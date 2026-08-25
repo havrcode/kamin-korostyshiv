@@ -80,7 +80,7 @@ export default function Home() {
           <span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span>
         </a>
         <nav className="desktop-nav" aria-label="Головна навігація">
-          <a href="#catalog">Каталог</a><a href="#process">Як ми працюємо</a><a href="#stone">Види каменю</a><a href="#about">Про майстерню</a>
+          <a href="#catalog">Каталог</a><a href="#process">Як ми працюємо</a><a href="#stone">Види каменю</a><a href="#about">Про нас</a>
         </nav>
         <a className="header-cta" href="#contact"><span>Прорахувати вартість</span><Icon name="arrow" /></a>
         <button className="menu-button" aria-label="Відкрити меню" aria-expanded={menuOpen} onClick={() => setMenuOpen(true)}><Icon name="menu" /></button>
@@ -89,7 +89,7 @@ export default function Home() {
       <div className={`mobile-menu ${menuOpen ? "is-open" : ""}`} aria-hidden={!menuOpen}>
         <div className="mobile-menu-head"><span>Навігація</span><button onClick={() => setMenuOpen(false)} aria-label="Закрити меню"><Icon name="x" /></button></div>
         <nav aria-label="Мобільна навігація">
-          {[["Каталог", "catalog"], ["Як ми працюємо", "process"], ["Види каменю", "stone"], ["Про майстерню", "about"], ["Контакти", "contact"]].map(([label, id]) => (
+          {[["Каталог", "catalog"], ["Як ми працюємо", "process"], ["Види каменю", "stone"], ["Про нас", "about"], ["Контакти", "contact"]].map(([label, id]) => (
             <a href={`#${id}`} onClick={() => setMenuOpen(false)} key={id}>{label}<Icon name="arrow" /></a>
           ))}
         </nav>
@@ -98,20 +98,20 @@ export default function Home() {
       <section className="hero" id="top">
         <div className="hero-image" role="img" aria-label="Сучасний меморіальний комплекс із граніту"></div><div className="hero-overlay"></div>
         <div className="hero-content content-wrap">
-          <p className="eyebrow light"><span></span>Виробництво у Коростишеві</p>
+          <p className="eyebrow light"><span></span>Вироби з каменю · Коростишів</p>
           <h1>Пам’ять у камені.<br /><em>Майстерність</em> у деталях.</h1>
-          <p className="hero-lead">Пам’ятники, меморіальні комплекси та вироби з натурального граніту й мармуру — від ідеї та 3D-проєкту до встановлення.</p>
+          <p className="hero-lead">Пам’ятники, меморіальні комплекси та вироби з натурального граніту й мармуру — від вибору матеріалу та узгодження проєкту до встановлення.</p>
           <div className="hero-actions"><a className="button primary" href="#catalog">Переглянути каталог <Icon name="arrow" /></a><a className="button glass" href="#contact">Обговорити ваш проєкт</a></div>
         </div>
         <div className="hero-facts content-wrap" aria-label="Переваги">
-          <div><Icon name="cube" /><span><b>3D-візуалізація</b><small>до початку робіт</small></span></div>
-          <div><Icon name="ruler" /><span><b>Власне виробництво</b><small>контроль кожного етапу</small></span></div>
-          <div><Icon name="truck" /><span><b>Повний цикл</b><small>виготовлення та монтаж</small></span></div>
+          <div><Icon name="cube" /><span><b>Точний проєкт</b><small>усі деталі до початку робіт</small></span></div>
+          <div><Icon name="ruler" /><span><b>Виготовлення</b><small>увага до матеріалу й обробки</small></span></div>
+          <div><Icon name="truck" /><span><b>Зручне замовлення</b><small>від вибору до встановлення</small></span></div>
         </div>
       </section>
 
       <section className="intro content-wrap" id="about">
-        <div><p className="eyebrow"><span></span>Про майстерню</p><h2>Не просто виріб.<br />Цілісне рішення <em>на роки.</em></h2></div>
+        <div><p className="eyebrow"><span></span>Про нашу роботу</p><h2>Не просто виріб.<br />Цілісне рішення <em>на роки.</em></h2></div>
         <div className="intro-copy"><p>Ми створюємо вироби з натурального каменю з повагою до вашої історії та увагою до кожної деталі. Форма, пропорції, матеріали й оздоблення погоджуються до початку виробництва.</p><a className="text-link" href="#process">Дізнатися, як проходить замовлення <Icon name="arrow" /></a></div>
       </section>
 
@@ -132,7 +132,7 @@ export default function Home() {
           <ol className="steps">
             <li><span>01</span><Icon name="phone" /><b>Знайомимося</b><p>Ви описуєте побажання, показуєте приклади або просто називаєте бюджет і задачу.</p></li>
             <li><span>02</span><Icon name="spark" /><b>Створюємо проєкт</b><p>Підбираємо камінь, форму та композицію. Готуємо візуалізацію майбутнього виробу.</p></li>
-            <li><span>03</span><Icon name="ruler" /><b>Виготовляємо</b><p>Ріжемо, шліфуємо, поліруємо, виконуємо художні роботи й перевіряємо якість.</p></li>
+            <li><span>03</span><Icon name="ruler" /><b>Виготовляємо</b><p>Камінь проходить різання, шліфування, полірування, художні роботи та перевірку якості.</p></li>
             <li><span>04</span><Icon name="shield" /><b>Доставляємо</b><p>Готуємо виріб до перевезення та за домовленістю виконуємо професійне встановлення.</p></li>
           </ol>
         </div>
