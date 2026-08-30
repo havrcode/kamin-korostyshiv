@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("renders the public contact foundation", async () => {
@@ -34,4 +35,16 @@ test("renders the public contact foundation", async () => {
   assert.match(html, /\+380 66 057 09 87/);
   assert.match(html, /Попередня версія: ця форма ще не надсилає персональні дані/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
+});
+
+test("centers the animated hero facts without a transform conflict", async () => {
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  const heroFactsRule = css.match(/\.hero-facts\s*\{[^}]+\}/)?.[0] ?? "";
+
+  assert.match(heroFactsRule, /inset-inline:\s*0/);
+  assert.match(heroFactsRule, /margin-inline:\s*auto/);
+  assert.doesNotMatch(heroFactsRule, /translateX/);
 });

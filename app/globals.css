@@ -88,7 +88,7 @@ body.motion-ready [data-reveal].is-visible { opacity: 1; transform: translateY(0
 .button.glass:hover { background: rgba(255,255,255,.1); }
 .button.dark { background: var(--ink); color: #fff; }
 .button.dark:hover { background: #34393c; }
-.hero-facts { position: absolute; z-index: 2; left: 50%; transform: translateX(-50%); bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255,255,255,.2); }
+.hero-facts { position: absolute; z-index: 2; inset-inline: 0; margin-inline: auto; bottom: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid rgba(255,255,255,.2); }
 .hero-facts > div { min-height: 98px; display: flex; align-items: center; gap: 18px; border-right: 1px solid rgba(255,255,255,.2); padding: 20px 32px; }
 .hero-facts > div:first-child { border-left: 1px solid rgba(255,255,255,.2); }
 .hero-facts svg { color: var(--bronze-light); width: 26px; height: 26px; }

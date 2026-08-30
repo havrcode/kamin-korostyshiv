@@ -45,7 +45,7 @@ git status -sb
 
 На початку нової задачі очікується чистий стан без незрозумілих файлів.
 
-## 3. Створити гілку для задачі
+## 3. Почати нову задачу
 
 Спочатку онови відомості про GitHub:
 
@@ -65,7 +65,11 @@ git switch main
 git pull --ff-only
 ```
 
-Створи нову гілку. Назву прикладу заміни назвою задачі:
+Для невеликої погодженої зміни в цьому одноосібному проєкті можна працювати в
+`main`: після перевірок Codex створить fast-forward commit і синхронізує його.
+
+Для великої, ризикової або експериментальної задачі створи окрему гілку. Назву
+прикладу заміни назвою задачі:
 
 ```bash
 git switch -c feature/v0.1.1-contact-foundation
@@ -171,7 +175,7 @@ git status -sb
 git commit -m "Prepare v0.1.1 contact and catalog foundation"
 ```
 
-Завантаж гілку:
+Якщо працюєш у feature-гілці, завантаж її:
 
 ```bash
 git push -u origin feature/v0.1.1-contact-foundation
@@ -183,7 +187,16 @@ git push -u origin feature/v0.1.1-contact-foundation
 git -c http.version=HTTP/1.1 -c http.postBuffer=10485760 push -u origin feature/v0.1.1-contact-foundation
 ```
 
-## 10. Pull Request
+Якщо працюєш у `main`, після успішних перевірок:
+
+```bash
+git push origin main
+```
+
+Codex також публікує перевірену версію на Sites. `git push` і публікація Sites —
+два окремі кроки: один не замінює інший.
+
+## 10. Pull Request для великих змін
 
 1. Відкрий GitHub.
 2. Відкрий репозиторій `kamin-korostyshiv`.
@@ -191,7 +204,10 @@ git -c http.version=HTTP/1.1 -c http.postBuffer=10485760 push -u origin feature/
 4. Перевір, що base — `main`, compare — твоя feature-гілка.
 5. Опиши, що змінилось і як перевірено.
 6. Для великої задачі створи Draft PR.
-7. Не натискай Merge, доки зміни не перевірені й немає прямої команди.
+7. Не натискай Merge, доки зміни не перевірені.
+
+Для дрібної перевіреної задачі PR не обов’язковий; для ризикової зміни він
+залишається корисною точкою огляду й відкату.
 
 ## 11. Cloudflare — що робитимемо, коли буде акаунт
 
