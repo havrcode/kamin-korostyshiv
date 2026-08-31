@@ -201,6 +201,35 @@ Codex також публікує перевірену версію на Sites. 
 `package.json`, наприклад `0.1.3` → `v0.1.3`. Тому перед кожною завершеною
 версією обов’язково піднімай `package.version`; старий тег ніколи не пересувай.
 
+Щоб пізніше підтягнути на Mac одразу всі коміти, повну історію і release-теги,
+відкрий Terminal у папці `kamin-korostyshiv` та виконай по черзі:
+
+```bash
+git status -sb
+```
+
+Якщо немає незбережених локальних змін:
+
+```bash
+git fetch origin --prune --tags
+```
+
+```bash
+git switch main
+```
+
+```bash
+git pull --ff-only origin main
+```
+
+```bash
+git log --oneline --decorate -10
+```
+
+Команда `fetch --tags` завантажує точки версій, а `pull --ff-only` не створює
+випадковий merge-коміт. Хмарний Codex не може виконати ці команди на вимкненому
+Mac; він зберігає готовий стан у GitHub, звідки локальний Codex його забирає.
+
 ## 10. Pull Request для великих змін
 
 1. Відкрий GitHub.

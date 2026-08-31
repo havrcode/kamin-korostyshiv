@@ -75,10 +75,17 @@ database/
     0000_closed_doctor_faustus.sql  перша незмінна SQL-міграція
 server/
   leads/
+    http.ts                  HTTP-межа, розмір, rate limit і відповіді
+    repository.ts            D1 batch, idempotency та публічний номер
     validation.ts            контракт, нормалізація й валідація заявки
 tests/
   rendered-html.test.mjs     smoke-перевірка зібраної сторінки
   lead-validation.test.ts    unit-тести серверної межі заявки
+  lead-repository.test.ts    атомарний D1 batch і повтори
+  lead-worker.test.ts        HTTP, bindings, розмір і rate limit
+worker/
+  index.ts                   Cloudflare Worker entrypoint тільки для API
+  wrangler.jsonc             базова конфігурація сухої збірки
 public/                      статичні зображення, favicon, Open Graph
 .openai/hosting.json         зв’язок саме з поточним ChatGPT Sites
 next.config.ts               статичний output: export
@@ -322,3 +329,47 @@ outbox → Telegram → адмінка.
 публічний Sites не збирає персональні дані: форма як і раніше показує тільки
 локальну чернетку. Binding і `POST /api/v1/leads` буде ввімкнено після
 погодження згоди, строку зберігання й одержувачів Telegram.
+
+## 13. Worker API-контур у 0.1.4
+
+`worker/index.ts` не рендерить сайт. Він лише передає HTTP-запит у
+`handleLeadApiRequest()`. Статичний frontend і надалі віддається з `out/`, тому
+відвідування звичайної сторінки не запускає Worker.
+
+### HTTP-межа
+
+`server/leads/http.ts` виконує перевірки в чіткому порядку:
+
+1. дозволяє тільки шлях `/api/v1/leads` і метод `POST`;
+2. приймає тільки `application/json`;
+3. вимагає `Idempotency-Key` довжиною 16–128 безпечних символів;
+4. відмовляє з `503`, якщо D1 або rate limiter не підключені;
+5. читає stream із реальною межею 16 КіБ, навіть якщо `Content-Length` збрехав;
+6. викликає `validateLeadInput()`;
+7. перевіряє Cloudflare rate limit за контрольованим `CF-Connecting-IP`;
+8. тільки після цього передає нормалізовані дані в репозиторій.
+
+Відповіді мають `Cache-Control: no-store`, `X-Content-Type-Options: nosniff` і
+окремий `X-Request-Id`. Лог помилки містить лише request ID та тип помилки —
+без імені, телефону або повідомлення клієнта.
+
+### Атомарне збереження
+
+`createLeadWithOutbox()` спочатку шукає заявку за `idempotency_key`. Якщо вона
+вже існує, повертає той самий `public_number`. Для нового запиту готуються два
+окремі prepared statements:
+
+1. `INSERT INTO leads ...`;
+2. `INSERT INTO notification_outbox ... PENDING`.
+
+Вони передаються в один `database.batch([...])`, який D1 виконує атомарно.
+Тобто не може з’явитися заявка без outbox-події або outbox без заявки.
+
+Унікальний індекс захищає від гонки двох однакових запитів. Якщо інший запит
+встиг першим, код повторно читає готовий номер і повертає `200` із
+`replayed: true`. Рідкісна колізія випадково згенерованого публічного номера
+отримує до трьох спроб.
+
+`worker/wrangler.jsonc` поки не містить реальних binding IDs. Це навмисно:
+dry-run доводить, що Worker компілюється, але випадковий запуск без production
+налаштувань не може приймати заявки. Публічна Sites-форма все ще локальна.

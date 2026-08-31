@@ -7,7 +7,7 @@
 
 ## Поточний стан
 
-Версія в роботі: `0.1.3`.
+Версія в роботі: `0.1.4`.
 
 - адаптивна презентаційна сторінка;
 - централізований номер `+380 66 057 09 87`;
@@ -17,6 +17,8 @@
 - `npm run build` створює статичний сайт у `out/`;
 - реалізовано типізований серверний контракт і валідацію майбутньої заявки;
 - підготовлено D1-схему `leads` + `notification_outbox` і першу міграцію;
+- підготовлено окремий `POST /api/v1/leads` із лімітом тіла, rate limit,
+  idempotency key та атомарним D1 batch `lead + outbox`;
 - D1, R2, Telegram і `/admin` ще не підключені;
 - цільовий production — власний Cloudflare Free;
 - поточний ChatGPT Sites — середовище розробки та демонстрації.
@@ -50,8 +52,8 @@ npm run typecheck
 npm test
 ```
 
-`npm test` виконує production build, smoke-тести статичного HTML та
-архітектурних обмежень, а також unit-тести валідації заявки.
+`npm test` виконує production build, smoke-тести статичного HTML,
+unit-тести валідації/API/D1-репозиторію та суху Worker-збірку Wrangler.
 
 ## Документація
 
@@ -72,6 +74,9 @@ npm test
 - `app/page.tsx` — UI та інтерактивний state;
 - `app/globals.css` — дизайн і responsive-поведінка;
 - `server/leads/validation.ts` — нормалізація й серверна перевірка заявки;
+- `server/leads/http.ts` — HTTP-межа, розмір запиту, rate limit і відповіді;
+- `server/leads/repository.ts` — D1 batch, idempotency та публічний номер;
+- `worker/index.ts` — окремий Worker entrypoint тільки для API;
 - `db/schema.ts` — таблиці D1 для заявок та надійної черги сповіщень;
 - `database/migrations/` — незмінні SQL-міграції й метадані Drizzle;
 - `next.config.ts` — статичний `output: "export"`;
@@ -86,3 +91,7 @@ fast-forward завантажуються в приватний GitHub `main`. �
 ніколи не пересувається. GitHub Actions повторно перевіряє кожен завершений
 стан і автоматично створює незмінний тег `v<package.version>` без окремої
 ітерації підтвердження.
+
+Папка на Mac не оновлюється з хмари фізично. Коли відкриєш проєкт локально,
+`git fetch origin --prune --tags` і `git pull --ff-only origin main` підтягнуть
+коміти, файли, історію та всі release-теги.

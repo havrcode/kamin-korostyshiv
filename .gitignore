@@ -38,6 +38,8 @@ next-env.d.ts
 *.tsbuildinfo
 /dist/
 /.wrangler/
+/.worker-dist/
+/worker/.worker-dist/
 /.sites-runtime/
 /outputs/
 /work/
