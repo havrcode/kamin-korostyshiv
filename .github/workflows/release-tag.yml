@@ -1,0 +1,67 @@
+name: Verify and tag release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-tag
+  cancel-in-progress: false
+
+jobs:
+  verify-and-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the verified version
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.before }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify source
+        run: |
+          npm run lint
+          npm run typecheck
+          npm test
+
+      - name: Create immutable version tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          tag="v${version}"
+          target="${{ github.event.before }}"
+
+          if [[ ! "${tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version tag: ${tag}" >&2
+            exit 1
+          fi
+
+          git fetch --tags --force
+          if git rev-parse "${tag}^{commit}" >/dev/null 2>&1; then
+            existing="$(git rev-parse "${tag}^{commit}")"
+            if [[ "${existing}" != "${target}" ]]; then
+              echo "${tag} already points to ${existing}, expected ${target}" >&2
+              exit 1
+            fi
+            echo "${tag} already exists on the verified commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${tag}" "${target}" -m "Verified release ${tag}"
+          git push origin "${tag}"
