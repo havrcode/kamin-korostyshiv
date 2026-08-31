@@ -16,10 +16,9 @@ jobs:
   verify-and-tag:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the verified version
+      - name: Check out source
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.before }}
           fetch-depth: 0
 
       - name: Set up Node.js
@@ -43,7 +42,7 @@ jobs:
           set -euo pipefail
           version="$(node -p "require('./package.json').version")"
           tag="v${version}"
-          target="${{ github.event.before }}"
+          target="${{ github.sha }}"
 
           if [[ ! "${tag}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Invalid version tag: ${tag}" >&2
