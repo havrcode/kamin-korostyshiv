@@ -104,6 +104,9 @@ npm run dev
 - Вигляд, мобільні правила та анімації: `app/globals.css`.
 - SEO title/description: `app/layout.tsx`.
 - Картинки: `public/`.
+- Приймання й перевірка заявки: `server/leads/`.
+- Черга Telegram, повтори й backoff: `server/notifications/`.
+- HTTP і Cron entrypoint Cloudflare: `worker/index.ts`.
 
 Не вставляй пароль, Telegram token або секрет Cloudflare в жоден із цих файлів.
 
@@ -126,6 +129,11 @@ npm run typecheck
 ```bash
 npm test
 ```
+
+У версії `0.1.5` unit-тести також штучно запускають двох конкурентних Worker,
+Telegram 429/503/401, зіпсовану відповідь, stale lock і шосту невдалу спробу.
+Для цього не потрібен справжній Telegram token: мережевий клієнт підміняється
+контрольованою тестовою функцією.
 
 Перевір вручну:
 

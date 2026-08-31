@@ -7,7 +7,7 @@
 
 ## Поточний стан
 
-Версія в роботі: `0.1.4`.
+Поточна перевірена версія: `0.1.5`.
 
 - адаптивна презентаційна сторінка;
 - централізований номер `+380 66 057 09 87`;
@@ -19,6 +19,10 @@
 - підготовлено D1-схему `leads` + `notification_outbox` і першу міграцію;
 - підготовлено окремий `POST /api/v1/leads` із лімітом тіла, rate limit,
   idempotency key та атомарним D1 batch `lead + outbox`;
+- реалізовано атомарний claim Telegram-outbox, п’ятихвилинне відновлення
+  застарілого lock, повтори з backoff і остаточний стан `FAILED`;
+- Worker робить негайну фонову спробу після збереження заявки, а Cron handler
+  обробляє чергу як резервний механізм;
 - D1, R2, Telegram і `/admin` ще не підключені;
 - цільовий production — власний Cloudflare Free;
 - поточний ChatGPT Sites — середовище розробки та демонстрації.
@@ -53,7 +57,8 @@ npm test
 ```
 
 `npm test` виконує production build, smoke-тести статичного HTML,
-unit-тести валідації/API/D1-репозиторію та суху Worker-збірку Wrangler.
+unit-тести валідації/API/D1-репозиторію, конкурентного outbox claim,
+Telegram/retry/Cron та суху Worker-збірку Wrangler.
 
 ## Документація
 
@@ -76,6 +81,9 @@ unit-тести валідації/API/D1-репозиторію та суху W
 - `server/leads/validation.ts` — нормалізація й серверна перевірка заявки;
 - `server/leads/http.ts` — HTTP-межа, розмір запиту, rate limit і відповіді;
 - `server/leads/repository.ts` — D1 batch, idempotency та публічний номер;
+- `server/notifications/outbox.ts` — атомарний claim, lease і переходи черги;
+- `server/notifications/telegram.ts` — безпечне форматування й Telegram API;
+- `server/notifications/processor.ts` — retry/backoff та пакетна обробка;
 - `worker/index.ts` — окремий Worker entrypoint тільки для API;
 - `db/schema.ts` — таблиці D1 для заявок та надійної черги сповіщень;
 - `database/migrations/` — незмінні SQL-міграції й метадані Drizzle;

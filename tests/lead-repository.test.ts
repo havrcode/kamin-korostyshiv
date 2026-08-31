@@ -28,6 +28,10 @@ class FakeStatement implements D1PreparedStatementLike {
   async first<T>(): Promise<T | null> {
     return (this.database.firstResults.shift() ?? null) as T | null;
   }
+
+  async all<T>(): Promise<{ results: T[] }> {
+    return { results: [] };
+  }
 }
 
 class FakeDatabase implements D1DatabaseLike {

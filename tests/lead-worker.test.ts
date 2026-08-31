@@ -26,6 +26,10 @@ class ApiStatement implements D1PreparedStatementLike {
       ? ({ public_number: this.database.existingPublicNumber } as T)
       : null;
   }
+
+  async all<T>(): Promise<{ results: T[] }> {
+    return { results: [] };
+  }
 }
 
 class ApiDatabase implements D1DatabaseLike {

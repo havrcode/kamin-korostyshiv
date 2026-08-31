@@ -373,3 +373,68 @@ outbox → Telegram → адмінка.
 `worker/wrangler.jsonc` поки не містить реальних binding IDs. Це навмисно:
 dry-run доводить, що Worker компілюється, але випадковий запуск без production
 налаштувань не може приймати заявки. Публічна Sites-форма все ще локальна.
+
+## 14. Telegram outbox у 0.1.5
+
+Outbox-процесор складається з трьох вузьких модулів:
+
+- `server/notifications/outbox.ts` володіє SQL claim і переходами станів;
+- `server/notifications/telegram.ts` форматує повідомлення та викликає Bot API;
+- `server/notifications/processor.ts` поєднує доставку з retry/backoff;
+- `worker/index.ts` запускає одну негайну спробу через `waitUntil` і має
+  `scheduled()` handler для майбутнього Cron Trigger.
+
+### Чому SELECT недостатньо
+
+Два Worker можуть одночасно виконати SELECT і побачити одну `PENDING`-подію.
+Тому право надсилати визначає не SELECT, а окремий умовний атомарний UPDATE:
+
+```sql
+UPDATE notification_outbox
+SET status = 'PROCESSING',
+    attempt_count = attempt_count + 1,
+    locked_at = ?
+WHERE id = ?
+  AND (
+    (status = 'PENDING' AND next_attempt_at <= ?)
+    OR (status = 'PROCESSING' AND locked_at <= ?)
+  )
+RETURNING attempt_count;
+```
+
+Лише Worker, який отримав рядок із `RETURNING`, продовжує доставку. Тест
+запускає два claim паралельно й підтверджує, що сумарно подію отримує один.
+
+### Lease і аварійне відновлення
+
+`locked_at` є одночасно часом і токеном lease. Через п’ять хвилин
+`PROCESSING` вважається застарілим і може бути захоплений новим Worker. Кожен
+фінальний UPDATE перевіряє `id + status='PROCESSING' + locked_at`. Якщо старий
+Worker прокинувся після повторного claim, його запис не застосовується й
+лічиться як `lostLease`.
+
+Це гарантує at-least-once, а не exactly-once доставку. Після невизначеного
+мережевого результату можливий повтор Telegram; унікальний `public_number` у
+повідомленні дозволяє майстру розпізнати дубль.
+
+### Стани та повтори
+
+| Результат | Новий стан | Наступна дія |
+|---|---|---|
+| Telegram підтвердив `ok: true` | `SENT` | більше не обробляти |
+| мережа, 408, 429 або 5xx | `PENDING` | 1 хв → 5 хв → 15 хв → 1 год → 6 год |
+| 429 із `retry_after` | `PENDING` | не раніше більшого з backoff і `retry_after` |
+| 4xx на кшталт 400/401/403 | `FAILED` | ручне виправлення конфігурації |
+| будь-яка невдача на 6-й спробі | `FAILED` | показати в майбутній адмінці |
+
+`FAILED` є остаточним і автоматично не claim-иться. Сира відповідь Telegram,
+bot token, ім’я, телефон і повідомлення не логуються. До Bot API передається
+HTML, але всі поля заявки спочатку екрануються.
+
+### Fail-closed конфігурація
+
+`processNotificationOutbox()` перевіряє `DB`, `TELEGRAM_BOT_TOKEN` і
+`TELEGRAM_CHAT_ID` до читання черги. Якщо хоча б одного binding немає, він
+повертає лише технічний код `NOTIFICATION_SERVICE_NOT_CONFIGURED` і не
+захоплює рядки. Поточний Sites залишається статичним, тому ці secrets у нього
+не додані, реальна форма нічого не надсилає.

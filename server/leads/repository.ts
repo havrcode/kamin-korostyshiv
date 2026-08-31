@@ -3,6 +3,7 @@ import type { ValidatedLeadInput } from "./validation.ts";
 export interface D1PreparedStatementLike {
   bind(...values: unknown[]): D1PreparedStatementLike;
   first<T = Record<string, unknown>>(columnName?: string): Promise<T | null>;
+  all<T = Record<string, unknown>>(): Promise<{ results: T[] }>;
 }
 
 export interface D1DatabaseLike {
