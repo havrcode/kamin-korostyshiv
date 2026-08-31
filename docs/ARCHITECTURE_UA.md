@@ -29,10 +29,12 @@ TypeScript — JavaScript із перевіркою типів. Наприкла
 Next задає структуру сторінок через каталог `app`. `app/page.tsx` відповідає за
 маршрут `/`, а `app/layout.tsx` — за спільну HTML-оболонку та метадані.
 
-### Vinext + Vite
+### Статичний export Next.js
 
-Vinext дає можливість запускати модель Next.js у Cloudflare Worker runtime.
-Vite збирає модулі, CSS і клієнтський JavaScript у deployable-артефакти.
+`next build` заздалегідь генерує HTML, CSS і JavaScript у каталозі `out/`.
+Звичайне відкриття сторінки не запускає Worker: CDN віддає готові файли.
+Браузер одразу бачить початковий HTML, а React після завантаження додає
+інтерактивність. Vinext і Vite в цій схемі не потрібні.
 
 ### Cloudflare Worker
 
@@ -57,42 +59,37 @@ Worker — короткоживуча серверна функція, яка з
 ```text
 app/
   components/
-    icon.tsx                 спільні SVG-іконки
+    ui-icon.tsx              спільні SVG-іконки
     reveal-observer.tsx      появи секцій під час прокручування
   data/
     catalog.ts               категорії, камінь, FAQ, значення форми
   layout.tsx                 HTML-оболонка й SEO metadata
   page.tsx                   головна сторінка та її інтерактивний стан
-  site-config.ts             повторювані контакти й робоча назва
+  site-config.ts             контакти, робоча назва й публічна адреса
   globals.css                уся візуальна система й адаптивність
 db/
   index.ts                   майбутнє створення Drizzle-клієнта для D1
   schema.ts                  майбутня схема таблиць
-worker/
-  index.ts                   точка входу Cloudflare Worker
 tests/
   rendered-html.test.mjs     smoke-перевірка зібраної сторінки
 public/                      статичні зображення, favicon, Open Graph
 .openai/hosting.json         зв’язок саме з поточним ChatGPT Sites
-vite.config.ts               збірка Vinext і локальна Cloudflare-сумісність
+next.config.ts               статичний output: export
+out/                         результат build; не зберігається в Git
 ```
 
 ## 3. Що відбувається під час відкриття сторінки зараз
 
 1. Браузер запитує `/`.
-2. Поточне середовище Sites передає запит у `worker/index.ts`.
-3. Метод `worker.fetch(request, env, ctx)` читає URL.
-4. Якщо шлях дорівнює `/_vinext/image`, викликається оптимізатор зображень.
-5. Для звичайного `/` викликається `handler.fetch(request, env, ctx)` із Vinext.
-6. App Router знаходить `app/layout.tsx` і `app/page.tsx`.
-7. Сервер формує початковий HTML.
-8. Браузер отримує HTML, CSS і JavaScript.
-9. React виконує hydration: під’єднує обробники до вже видимого HTML.
-10. Після hydration працюють меню, вкладки каменю, вибір категорії та форма.
+2. Cloudflare CDN або Sites віддає готовий `out/index.html`.
+3. HTML уже містить текст, посилання, форму й SEO-метадані.
+4. Браузер паралельно завантажує CSS та JavaScript.
+5. React виконує hydration: під’єднує обробники до вже видимого HTML.
+6. Після hydration працюють меню, вкладки каменю, вибір категорії та форма.
 
-Цільова production-архітектура на власному Cloudflare зробить публічні сторінки
-максимально статичними й кешованими, а Worker залишить для `/api/*`, `/admin`
-та інших серверних операцій. Це зменшує CPU-запити й зберігає Free-ліміти.
+Пізніше `POST /api/v1/leads` піде в окремий Cloudflare Worker. Тому публічний
+контент не витрачає Worker CPU, а серверний код запускається лише там, де
+справді потрібні перевірка, D1, Telegram або авторизація.
 
 ## 4. `Home()` у `app/page.tsx`
 

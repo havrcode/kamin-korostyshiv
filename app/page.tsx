@@ -4,7 +4,7 @@
 
 import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Icon } from "./components/icon";
+import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
 import { categories, faqs, interestOptions, stones } from "./data/catalog";
 import { siteConfig } from "./site-config";

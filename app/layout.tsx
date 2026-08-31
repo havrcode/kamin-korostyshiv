@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteConfig } from "./site-config";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.publicUrl),
   title: "Камінь Коростишів — вироби з граніту та мармуру",
   description: "Пам’ятники, меморіальні комплекси, столи, лавки, вази та лампадки з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
   openGraph: {

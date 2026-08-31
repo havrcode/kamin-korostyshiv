@@ -72,7 +72,7 @@ git pull --ff-only
 прикладу заміни назвою задачі:
 
 ```bash
-git switch -c feature/v0.1.1-contact-foundation
+git switch -c feature/v0.1.2-static-export
 ```
 
 ## 4. Встановити залежності
@@ -172,19 +172,19 @@ git status -sb
 Створи commit:
 
 ```bash
-git commit -m "Prepare v0.1.1 contact and catalog foundation"
+git commit -m "Replace Vinext with static Next export"
 ```
 
 Якщо працюєш у feature-гілці, завантаж її:
 
 ```bash
-git push -u origin feature/v0.1.1-contact-foundation
+git push -u origin feature/v0.1.2-static-export
 ```
 
 Якщо знову виникне відомий HTTPS RPC 400, для одного push можна застосувати:
 
 ```bash
-git -c http.version=HTTP/1.1 -c http.postBuffer=10485760 push -u origin feature/v0.1.1-contact-foundation
+git -c http.version=HTTP/1.1 -c http.postBuffer=10485760 push -u origin feature/v0.1.2-static-export
 ```
 
 Якщо працюєш у `main`, після успішних перевірок:
@@ -239,4 +239,6 @@ Cloudflare: цей файл належить поточному ChatGPT Sites.
 5. Яка помилка можлива?
 
 Почни з `chooseInterest`, потім `submitForm`, effect мобільного меню,
-`RevealObserver`, `Icon`, і лише після цього переходь до `worker.fetch`.
+`RevealObserver`, `Icon` у `ui-icon.tsx`, потім подивись `next.config.ts` і простеж, як
+`next build` створює `out/index.html`. До Worker API переходь після появи
+серверного коду у версії `v0.2.0`.

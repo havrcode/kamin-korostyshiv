@@ -3,38 +3,31 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("renders the public contact foundation", async () => {
-  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
-  workerUrl.searchParams.set("test", `${process.pid}-${Date.now()}`);
-  const { default: worker } = await import(workerUrl.href);
-
-  const response = await worker.fetch(
-    new Request("http://localhost/", {
-      headers: { accept: "text/html" },
-    }),
-    {
-      ASSETS: {
-        fetch: async () => new Response("Not found", { status: 404 }),
-      },
-    },
-    {
-      waitUntil() {},
-      passThroughOnException() {},
-    },
-  );
-
-  assert.equal(response.status, 200);
-  assert.match(
-    response.headers.get("content-type") ?? "",
-    /^text\/html\b/i,
-  );
-  const html = await response.text();
+  const html = await readFile(new URL("../out/index.html", import.meta.url), "utf8");
 
   assert.match(html, /<html lang="uk">/);
   assert.match(html, /<title>Камінь Коростишів/);
+  assert.match(html, /https:\/\/kamin-korostyshiv\.dev-mr-serg\.chatgpt\.site\/og\.png/);
+  assert.doesNotMatch(html, /localhost:3000/);
   assert.match(html, /href="tel:\+380660570987"/);
   assert.match(html, /\+380 66 057 09 87/);
   assert.match(html, /Попередня версія: ця форма ще не надсилає персональні дані/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
+});
+
+test("uses a static Next export without Vinext", async () => {
+  const packageJson = JSON.parse(
+    await readFile(new URL("../package.json", import.meta.url), "utf8"),
+  );
+  const hosting = JSON.parse(
+    await readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+  );
+
+  assert.equal(packageJson.scripts.build, "next build");
+  assert.equal(hosting.static.directory, "out");
+  assert.equal(packageJson.devDependencies?.vinext, undefined);
+  assert.equal(packageJson.devDependencies?.vite, undefined);
+  assert.equal(packageJson.devDependencies?.["@cloudflare/vite-plugin"], undefined);
 });
 
 test("centers the animated hero facts without a transform conflict", async () => {

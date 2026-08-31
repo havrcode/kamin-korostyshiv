@@ -1,17 +1,20 @@
 # Камінь Коростишів
 
 Сайт виробів із граніту та мармуру: каталог, заявка на прорахунок і майбутня
-адмінка. Frontend створено на React + TypeScript/Next і збирається Vinext/Vite
-для Cloudflare runtime.
+адмінка. Frontend створено на React + TypeScript/Next.js і збирається як
+звичайний статичний сайт. Cloudflare Worker буде окремо обробляти лише API та
+приватну серверну логіку.
 
 ## Поточний стан
 
-Версія в роботі: `0.1.1`.
+Версія в роботі: `0.1.2`.
 
 - адаптивна презентаційна сторінка;
 - централізований номер `+380 66 057 09 87`;
 - клік по категорії підставляє інтерес у форму;
 - форма поки готує лише локальну чернетку й нічого не надсилає;
+- Vinext/Vite та Worker-рендеринг публічних сторінок прибрано;
+- `npm run build` створює статичний сайт у `out/`;
 - D1, R2, Telegram і `/admin` ще не підключені;
 - цільовий production — власний Cloudflare Free;
 - поточний ChatGPT Sites — середовище розробки та демонстрації.
@@ -44,7 +47,8 @@ npm run typecheck
 npm test
 ```
 
-`npm test` виконує production build і smoke-тест зібраного Worker.
+`npm test` виконує production build і smoke-тести статичного HTML та
+архітектурних обмежень.
 
 ## Документація
 
@@ -60,11 +64,12 @@ npm test
 
 ## Важливі файли
 
-- `app/site-config.ts` — контакти й робоча назва;
+- `app/site-config.ts` — контакти, робоча назва й поточна публічна адреса;
 - `app/data/catalog.ts` — категорії, камені, FAQ;
 - `app/page.tsx` — UI та інтерактивний state;
 - `app/globals.css` — дизайн і responsive-поведінка;
-- `worker/index.ts` — Cloudflare Worker entry;
+- `next.config.ts` — статичний `output: "export"`;
+- `out/` — згенерований статичний сайт, який не зберігається в Git;
 - `.openai/hosting.json` — тільки зв’язок із ChatGPT Sites, не production-конфіг
   майбутнього власного Cloudflare-акаунта.
 
