@@ -7,7 +7,7 @@
 ## 1. Що встановити на Mac
 
 1. Встанови Git.
-2. Встанови Node.js версії 22.13 або новішої.
+2. Встанови Node.js версії 22.18 або новішої.
 3. Встанови IntelliJ IDEA або VS Code.
 4. Не встановлюй PHP/Apache для цього проєкту: вони не потрібні.
 
@@ -99,13 +99,17 @@ npm run dev
 ## 6. Де змінювати найчастіші речі
 
 - Телефон/робоча назва: `app/site-config.ts`.
-- Категорії, значення форми, камінь, FAQ: `app/data/catalog.ts`.
+- Категорії, 9 товарів, фото, матеріали й FAQ: `app/data/catalog.ts`.
+- Сторінки каталогу: `app/catalog/`.
 - Структура головної сторінки й поведінка: `app/page.tsx`.
 - Вигляд, мобільні правила та анімації: `app/globals.css`.
 - SEO title/description: `app/layout.tsx`.
 - Картинки: `public/`.
 - Приймання й перевірка заявки: `server/leads/`.
 - Черга Telegram, повтори й backoff: `server/notifications/`.
+- Turnstile: `server/security/turnstile.ts`.
+- Access і admin API: `server/admin/`.
+- Відокремлений кошторис: `server/estimates/calculator.ts`.
 - HTTP і Cron entrypoint Cloudflare: `worker/index.ts`.
 
 Не вставляй пароль, Telegram token або секрет Cloudflare в жоден із цих файлів.
@@ -130,10 +134,14 @@ npm run typecheck
 npm test
 ```
 
-У версії `0.1.5` unit-тести також штучно запускають двох конкурентних Worker,
+У версії `1.0.0` unit-тести також штучно запускають двох конкурентних Worker,
 Telegram 429/503/401, зіпсовану відповідь, stale lock і шосту невдалу спробу.
 Для цього не потрібен справжній Telegram token: мережевий клієнт підміняється
 контрольованою тестовою функцією.
+
+Окремі тести перевіряють Turnstile, криптографічний підпис Access JWT і те, що
+клієнтський кошторис не містить слів/полів собівартості або націнки. Загалом
+реліз має 4 rendered-HTML smoke-тести й 32 unit-тести.
 
 Перевір вручну:
 
@@ -142,7 +150,7 @@ Telegram 429/503/401, зіпсовану відповідь, stale lock і шо�
 3. меню;
 4. усі якорі;
 5. кнопки дзвінка;
-6. вибір кожної категорії;
+6. `/catalog/`, усі категорії та щонайменше три різні товарні сторінки;
 7. вкладки каменю;
 8. форму з клавіатури;
 9. режим reduced motion у системі/DevTools.
@@ -266,9 +274,11 @@ Mac; він зберігає готовий стан у GitHub, звідки л�
 9. тільки потім під’єднаємо домен;
 10. налаштуємо резервні копії, логи й сповіщення.
 
-Точні команди Wrangler з’являться після створення конфігурації власного
-Cloudflare-проєкту. Не використовуй `.openai/hosting.json` як конфіг власного
-Cloudflare: цей файл належить поточному ChatGPT Sites.
+Точні команди, кнопки dashboard, D1/Turnstile/Access/Telegram, deploy і
+відновлення вже описані в `docs/CLOUDFLARE_SETUP_UA.md`. Вибір реєстратора й
+nameserver — у `docs/DOMAIN_SETUP_UA.md`. Не використовуй
+`.openai/hosting.json` як конфіг власного Cloudflare: цей файл належить
+поточному ChatGPT Sites.
 
 ## 12. Як читати код і вчитися
 
@@ -280,7 +290,23 @@ Cloudflare: цей файл належить поточному ChatGPT Sites.
 4. Що змінює або повертає?
 5. Яка помилка можлива?
 
-Почни з `chooseInterest`, потім `submitForm`, effect мобільного меню,
-`RevealObserver`, `Icon` у `ui-icon.tsx`, потім подивись `next.config.ts` і простеж, як
-`next build` створює `out/index.html`. До Worker API переходь після появи
-серверного коду у версії `v0.2.0`.
+Почни з масивів у `app/data/catalog.ts`, потім `ProductCard`, product route,
+query effect у `Home`, `chooseInterest` і `submitForm`. Далі прочитай
+`handleLeadApiRequest` → `verifyTurnstile` → `createLeadWithOutbox` →
+`processNotificationOutbox`. Для адмінки простеж `AdminLeads` →
+`handleAdminApiRequest` → `verifyAdminAccess`. Для кошторису порівняй типи
+`InternalEstimate` і `ClientEstimate` та відповідний unit-тест.
+
+## 13. Як замінити демонстраційний товар
+
+1. Підготуй WebP приблизно 1200×800 без чужих watermark.
+2. Додай файл у `public/` із зрозумілим ім’ям.
+3. Знайди товар у `app/data/catalog.ts`.
+4. Якщо це той самий бізнес-товар, не змінюй його `id` і `slug`.
+5. Заміни `image`, `imageAlt`, title/summary/materials/options.
+6. Для справжньої фотографії виконаної роботи постав `visualization: false`.
+7. Не додавай ціну, доки вона не погоджена й не має серверного джерела.
+8. Запусти lint, typecheck, test і перевір wide/mobile.
+
+Повний список поточних visuals та правила їх заміни:
+`docs/CONTENT_ASSUMPTIONS_UA.md`.

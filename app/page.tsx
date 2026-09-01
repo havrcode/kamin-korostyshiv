@@ -4,6 +4,8 @@
 
 import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import Script from "next/script";
+import Link from "next/link";
 import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
 import { categories, faqs, interestOptions, stones } from "./data/catalog";
@@ -13,7 +15,9 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeStone, setActiveStone] = useState(0);
   const [selectedInterest, setSelectedInterest] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [selectedProductId, setSelectedProductId] = useState("");
+  const [submitState, setSubmitState] = useState<"idle" | "submitting" | "preview" | "success" | "error">("idle");
+  const [publicNumber, setPublicNumber] = useState("");
   const currentStone = useMemo(() => stones[activeStone], [activeStone]);
 
   useEffect(() => {
@@ -34,14 +38,60 @@ export default function Home() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const interest = params.get("interest");
+    const productId = params.get("productId");
+    const frame = window.requestAnimationFrame(() => {
+      if (interest) setSelectedInterest(interest.slice(0, 120));
+      if (productId && /^[a-z0-9][a-z0-9-]{1,79}$/.test(productId)) setSelectedProductId(productId);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
   function chooseInterest(value: string) {
     setSelectedInterest(value);
-    setSubmitted(false);
+    setSelectedProductId("");
+    setSubmitState("idle");
   }
 
-  function submitForm(event: FormEvent<HTMLFormElement>) {
+  async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
+    if (!siteConfig.leads.enabled) {
+      setSubmitState("preview");
+      return;
+    }
+
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    setSubmitState("submitting");
+    try {
+      const response = await fetch(siteConfig.leads.endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Idempotency-Key": crypto.randomUUID().replaceAll("-", ""),
+        },
+        body: JSON.stringify({
+          name: data.get("name"),
+          phone: data.get("phone"),
+          categoryId: categories.find(({ formValue }) => formValue === selectedInterest)?.id ?? null,
+          productId: selectedProductId || null,
+          categorySnapshot: selectedInterest,
+          message: data.get("message"),
+          consentAccepted: data.get("consentAccepted") === "on",
+          website: data.get("website"),
+          turnstileToken: data.get("cf-turnstile-response"),
+        }),
+      });
+      const payload = await response.json() as { ok?: boolean; lead?: { publicNumber?: string } };
+      if (!response.ok || !payload.ok || !payload.lead?.publicNumber) throw new Error("lead_failed");
+      setPublicNumber(payload.lead.publicNumber);
+      setSubmitState("success");
+      form.reset();
+    } catch {
+      setSubmitState("error");
+    }
   }
 
   return (
@@ -111,17 +161,17 @@ export default function Home() {
           {categories.map((category, index) => (
             <a
               className={`category-card card-${index + 1}`}
-              href="#contact"
+              href={`/catalog/${category.slug}/`}
               key={category.slug}
-              onClick={() => chooseInterest(category.formValue)}
               data-reveal
               style={{ "--reveal-delay": `${Math.min(index, 2) * 70}ms` } as CSSProperties}
-              aria-label={`${category.title}: обрати та перейти до форми`}
+              aria-label={`${category.title}: відкрити категорію`}
             >
               <img src={category.image} alt="" /><span className="category-shade"></span><span className="category-tag">{category.tag}</span><span className="category-copy"><b>{category.title}</b><small>{category.text}</small></span><span className="round-arrow"><Icon name="arrow" /></span>
             </a>
           ))}
         </div>
+        <div className="catalog-all content-wrap"><Link className="button dark" href="/catalog/">Переглянути весь каталог <Icon name="arrow" /></Link><small>{siteConfig.catalogNotice}</small></div>
       </section>
 
       <section className="process-section" id="process">
@@ -157,15 +207,15 @@ export default function Home() {
       </section>
 
       <section className="contact-section" id="contact"><div className="content-wrap contact-grid" data-reveal>
-        <div className="contact-copy"><p className="eyebrow light"><span></span>Почнімо з розмови</p><h2>Розкажіть, який виріб<br />ви хочете <em>створити.</em></h2><p>Оберіть напрямок і підготуйте короткий опис. Поки ми підключаємо надійне серверне надсилання заявок, найшвидший спосіб зв’язку — телефон.</p><a className="contact-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span><small>Телефон для консультації</small><b>{siteConfig.phone.display}</b></span></a><div className="contact-note"><Icon name="check" /><span><b>Без поспішних рішень</b><small>Спочатку обговорення, матеріал і проєкт — потім виробництво.</small></span></div></div>
-        {submitted ? <div className="form-success" role="status"><span><Icon name="check" /></span><h3>Чернетку заявки підготовлено</h3><p>Дані нікуди не надсилалися: серверну частину форми ще розробляємо. Зателефонуйте за номером <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a> або поверніться до форми.</p><button type="button" onClick={() => setSubmitted(false)}>Повернутися до форми</button></div> :
+        <div className="contact-copy"><p className="eyebrow light"><span></span>Почнімо з розмови</p><h2>Розкажіть, який виріб<br />ви хочете <em>створити.</em></h2><p>{siteConfig.leads.enabled ? "Залиште контакт і короткий опис. Заявка спочатку надійно збережеться, а потім майстер отримає сповіщення." : "Форма повністю підготовлена, але збір персональних даних у тестовій версії вимкнено до підключення власного Cloudflare та підтвердження правил зберігання. Найшвидший зв’язок зараз — телефон."}</p><a className="contact-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span><small>Телефон для консультації</small><b>{siteConfig.phone.display}</b></span></a><div className="contact-note"><Icon name="check" /><span><b>Без поспішних рішень</b><small>Спочатку обговорення, матеріал і проєкт — потім виробництво.</small></span></div></div>
+        {(submitState === "preview" || submitState === "success") ? <div className="form-success" role="status"><span><Icon name="check" /></span><h3>{submitState === "success" ? `Заявку ${publicNumber} збережено` : "Чернетку заявки підготовлено"}</h3><p>{submitState === "success" ? "Майстер отримає сповіщення й зв’яжеться з вами. Збережіть номер заявки." : <>Дані нікуди не надсилалися: на публічному Sites збір персональних даних вимкнений. Зателефонуйте за номером <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>.</>}</p><button type="button" onClick={() => setSubmitState("idle")}>Повернутися до форми</button></div> :
           <form className="contact-form" onSubmit={submitForm} aria-describedby="form-preview-note">
             {selectedInterest && <p className="selected-interest full"><Icon name="check" />Обрано: <b>{selectedInterest}</b></p>}
-            <label><span>Ваше ім’я</span><input name="name" type="text" placeholder="Як до вас звертатися" autoComplete="name" required /></label><label><span>Номер телефону</span><input name="phone" type="tel" placeholder="+38 (___) ___-__-__" autoComplete="tel" required /></label><label><span>Що вас цікавить?</span><select name="category" value={selectedInterest} onChange={(event) => setSelectedInterest(event.target.value)} required><option value="" disabled>Оберіть категорію</option>{interestOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label><label className="full"><span>Коротко про побажання</span><textarea name="message" rows={3} placeholder="Матеріал, форма, орієнтовний бюджет або посилання на приклад"></textarea></label><button className="button primary dark full" type="submit">Підготувати чернетку <Icon name="arrow" /></button><small className="form-policy" id="form-preview-note">Попередня версія: ця форма ще не надсилає персональні дані.</small>
+            <label><span>Ваше ім’я</span><input name="name" type="text" placeholder="Як до вас звертатися" autoComplete="name" minLength={2} maxLength={80} required /></label><label><span>Номер телефону</span><input name="phone" type="tel" placeholder="+38 (___) ___-__-__" autoComplete="tel" required /></label><label><span>Що вас цікавить?</span><select name="categoryId" value={selectedInterest} onChange={(event) => chooseInterest(event.target.value)} required><option value="" disabled>Оберіть категорію</option>{interestOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label><label className="full"><span>Коротко про побажання</span><textarea name="message" rows={3} maxLength={2000} placeholder="Матеріал, форма, орієнтовний бюджет або посилання на приклад"></textarea></label><label className="honeypot" aria-hidden="true"><span>Сайт</span><input name="website" tabIndex={-1} autoComplete="off" /></label>{siteConfig.leads.enabled && <><label className="consent full"><input name="consentAccepted" type="checkbox" required /><span>Погоджуюся на використання контактних даних лише для відповіді на звернення. <a href="/privacy/">Докладніше</a></span></label>{siteConfig.leads.turnstileSiteKey ? <div className="turnstile full"><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" /><div className="cf-turnstile" data-sitekey={siteConfig.leads.turnstileSiteKey} data-theme="light"></div></div> : <p className="form-error full">Форма вимкнена: не налаштований публічний ключ Turnstile.</p>}</>} {submitState === "error" && <p className="form-error full" role="alert">Не вдалося зберегти заявку. Дані не підтверджені як надіслані — будь ласка, зателефонуйте.</p>}<button className="button primary dark full" type="submit" disabled={submitState === "submitting" || (siteConfig.leads.enabled && !siteConfig.leads.turnstileSiteKey)}>{siteConfig.leads.enabled ? (submitState === "submitting" ? "Надсилаємо…" : "Надіслати заявку") : "Підготувати чернетку"} <Icon name="arrow" /></button><small className="form-policy" id="form-preview-note">{siteConfig.leads.enabled ? <>Надсилаючи форму, ви підтверджуєте згоду версії {siteConfig.leads.consentVersion}.</> : <>Тестовий режим: форма не надсилає й не зберігає персональні дані. <a href="/privacy/">Політика конфіденційності</a></>}</small>
           </form>}
       </div></section>
 
-      <footer><div className="content-wrap footer-top"><div className="brand footer-brand"><span className="brand-mark"><span>K</span></span><span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span></div><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Попередня версія.</span><span>Україна · {siteConfig.location}</span></div></footer>
+      <footer><div className="content-wrap footer-top"><div className="brand footer-brand"><span className="brand-mark"><span>K</span></span><span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span></div><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a><a href="/privacy/">Конфіденційність</a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Демонстраційний каталог.</span><span>Україна · {siteConfig.location}</span></div></footer>
       <a className="floating-contact" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span>Зателефонувати</span></a>
     </main>
   );

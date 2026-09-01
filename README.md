@@ -1,105 +1,91 @@
 # Камінь Коростишів
 
-Сайт виробів із граніту та мармуру: каталог, заявка на прорахунок і майбутня
-адмінка. Frontend створено на React + TypeScript/Next.js і збирається як
-звичайний статичний сайт. Cloudflare Worker буде окремо обробляти лише API та
-приватну серверну логіку.
+Версія `1.0.0` — завершена публічна демонстрація сайту виробів із граніту та
+мармуру. Frontend створено на React + TypeScript/Next.js і збирається як
+статичний сайт. Окремий Cloudflare Worker містить перевірений контур заявок,
+Telegram-outbox, захищеної адмінки та приватного кошторису.
 
-## Поточний стан
+## Що вже є
 
-Поточна перевірена версія: `0.1.5`.
+- адаптивна головна сторінка й делікатні анімації з `prefers-reduced-motion`;
+- каталог із 5 категорій, 9 товарних концепцій і окремих SEO-сторінок;
+- 9 оптимізованих WebP-візуалізацій, прямо позначених як згенеровані;
+- вибір товару з передаванням стабільного `productId` у форму;
+- чесний режим «після прорахунку» без вигаданих цін;
+- політика конфіденційності, `robots.txt`, `sitemap.xml` і власна 404-сторінка;
+- `POST /api/v1/leads`: D1, idempotency, rate limit, Turnstile й outbox;
+- Telegram retry/Cron із захистом від конкурентної доставки;
+- `/admin`: Cloudflare Access JWT, email allowlist, список заявок і audit log;
+- серверний калькулятор, який відокремлює собівартість від клієнтського JSON;
+- production-приклад Wrangler та дві докладні інструкції Cloudflare/домену.
 
-- адаптивна презентаційна сторінка;
-- централізований номер `+380 66 057 09 87`;
-- клік по категорії підставляє інтерес у форму;
-- форма поки готує лише локальну чернетку й нічого не надсилає;
-- Vinext/Vite та Worker-рендеринг публічних сторінок прибрано;
-- `npm run build` створює статичний сайт у `out/`;
-- реалізовано типізований серверний контракт і валідацію майбутньої заявки;
-- підготовлено D1-схему `leads` + `notification_outbox` і першу міграцію;
-- підготовлено окремий `POST /api/v1/leads` із лімітом тіла, rate limit,
-  idempotency key та атомарним D1 batch `lead + outbox`;
-- реалізовано атомарний claim Telegram-outbox, п’ятихвилинне відновлення
-  застарілого lock, повтори з backoff і остаточний стан `FAILED`;
-- Worker робить негайну фонову спробу після збереження заявки, а Cron handler
-  обробляє чергу як резервний механізм;
-- D1, R2, Telegram і `/admin` ще не підключені;
-- цільовий production — власний Cloudflare Free;
-- поточний ChatGPT Sites — середовище розробки та демонстрації.
-
-Актуальний чекліст: [docs/PROJECT_STATUS_UA.md](docs/PROJECT_STATUS_UA.md).
+Публічний ChatGPT Sites працює в демонстраційному режимі: форма не передає і
+не зберігає персональні дані. Реальне приймання заявок вмикається тільки у
+власному Cloudflare після створення D1/Turnstile/Access, внесення secrets і
+погодження юридичних даних бізнесу. Це навмисна межа безпеки, а не відсутня
+реалізація.
 
 ## Запуск
 
-Вимоги: Node.js `>=22.18.0`, npm і Git. Ця версія Node виконує erasable
-TypeScript у unit-тестах без додаткового test runner.
+Потрібні Node.js `>=22.18.0`, npm і Git.
 
 ```bash
 npm ci
-```
-
-```bash
 npm run dev
 ```
 
-## Перевірки
+Повна перевірка:
 
 ```bash
 npm run lint
-```
-
-```bash
 npm run typecheck
-```
-
-```bash
 npm test
 ```
 
-`npm test` виконує production build, smoke-тести статичного HTML,
-unit-тести валідації/API/D1-репозиторію, конкурентного outbox claim,
-Telegram/retry/Cron та суху Worker-збірку Wrangler.
+`npm test` виконує production build 22 статичних маршрутів, smoke-тести HTML,
+32 unit-тести й суху Wrangler-збірку Worker.
+
+## Основні файли
+
+- `app/site-config.ts` — контакти, публічна адреса й перемикач реальних заявок;
+- `app/data/catalog.ts` — 5 категорій і 9 товарів зі стабільними ID/slug;
+- `app/catalog/` — каталог, категорії й товарні сторінки;
+- `app/page.tsx` — головна та форма;
+- `server/leads/` — контракт, валідація, Turnstile/D1 HTTP-контур;
+- `server/notifications/` — Telegram outbox, retry, lease і Cron;
+- `server/admin/` — перевірка Access JWT та API заявок;
+- `server/estimates/calculator.ts` — приватний і клієнтський кошториси;
+- `db/schema.ts` і `database/migrations/` — D1-схема й незмінні міграції;
+- `worker/index.ts` — Worker entrypoint для `/api/*` і Cron;
+- `worker/wrangler.production.example.jsonc` — шаблон власного Cloudflare;
+- `public/visual-*.webp` — тимчасові згенеровані візуалізації.
 
 ## Документація
 
-- [План розробки](docs/PROJECT_PLAN_UA.md)
 - [Поточний стан](docs/PROJECT_STATUS_UA.md)
-- [Повний контекст і передача проєкту](docs/HANDOFF_UA.md)
-- [Журнал архітектурних рішень](docs/DECISIONS_UA.md)
-- [Архітектура та функції](docs/ARCHITECTURE_UA.md)
-- [Інструкція для початківця](docs/BEGINNER_GUIDE_UA.md)
+- [План розробки](docs/PROJECT_PLAN_UA.md)
+- [Повний контекст і передача](docs/HANDOFF_UA.md)
+- [Архітектура та виклики](docs/ARCHITECTURE_UA.md)
+- [Журнал рішень](docs/DECISIONS_UA.md)
+- [Покрокова інструкція розробника](docs/BEGINNER_GUIDE_UA.md)
+- [Cloudflare від створення акаунта до запуску](docs/CLOUDFLARE_SETUP_UA.md)
+- [Вибір і підключення домену](docs/DOMAIN_SETUP_UA.md)
+- [Походження демонстраційного контенту](docs/CONTENT_ASSUMPTIONS_UA.md)
 - [План 2D/3D-конструктора](docs/CONSTRUCTOR_2D_3D_PLAN_UA.md)
 - [Історія змін](CHANGELOG.md)
-- [Правила для Codex/розробника](AGENTS.md)
 
-## Важливі файли
+## Git і релізи
 
-- `app/site-config.ts` — контакти, робоча назва й поточна публічна адреса;
-- `app/data/catalog.ts` — категорії, камені, FAQ;
-- `app/page.tsx` — UI та інтерактивний state;
-- `app/globals.css` — дизайн і responsive-поведінка;
-- `server/leads/validation.ts` — нормалізація й серверна перевірка заявки;
-- `server/leads/http.ts` — HTTP-межа, розмір запиту, rate limit і відповіді;
-- `server/leads/repository.ts` — D1 batch, idempotency та публічний номер;
-- `server/notifications/outbox.ts` — атомарний claim, lease і переходи черги;
-- `server/notifications/telegram.ts` — безпечне форматування й Telegram API;
-- `server/notifications/processor.ts` — retry/backoff та пакетна обробка;
-- `worker/index.ts` — окремий Worker entrypoint тільки для API;
-- `db/schema.ts` — таблиці D1 для заявок та надійної черги сповіщень;
-- `database/migrations/` — незмінні SQL-міграції й метадані Drizzle;
-- `next.config.ts` — статичний `output: "export"`;
-- `out/` — згенерований статичний сайт, який не зберігається в Git;
-- `.openai/hosting.json` — тільки зв’язок із ChatGPT Sites, не production-конфіг
-  майбутнього власного Cloudflare-акаунта.
+Після чистих перевірок той самий стан публікується на Sites і завантажується у
+приватний GitHub `main`. GitHub Actions ще раз перевіряє commit і створює
+незмінний тег `v<package.version>`. Старі теги ніколи не пересуваються.
 
-## Робочий цикл
+Щоб пізніше підтягнути на Mac код, історію й усі теги:
 
-Після чистих перевірок погоджені зміни автоматично публікуються на Sites і
-fast-forward завантажуються в приватний GitHub `main`. Базовий тег `v0.1.0`
-ніколи не пересувається. GitHub Actions повторно перевіряє кожен завершений
-стан і автоматично створює незмінний тег `v<package.version>` без окремої
-ітерації підтвердження.
-
-Папка на Mac не оновлюється з хмари фізично. Коли відкриєш проєкт локально,
-`git fetch origin --prune --tags` і `git pull --ff-only origin main` підтягнуть
-коміти, файли, історію та всі release-теги.
+```bash
+git status -sb
+git fetch origin --prune --tags
+git switch main
+git pull --ff-only origin main
+git log --oneline --decorate -10
+```

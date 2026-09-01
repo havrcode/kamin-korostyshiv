@@ -9,6 +9,7 @@ export const leads = sqliteTable(
     name: text("name").notNull(),
     phoneNormalized: text("phone_normalized").notNull(),
     categoryId: text("category_id"),
+    productId: text("product_id"),
     categorySnapshot: text("category_snapshot").notNull(),
     message: text("message"),
     status: text("status", {
@@ -59,5 +60,23 @@ export const notificationOutbox = sqliteTable(
       table.lockedAt,
     ),
     index("notification_outbox_lead_idx").on(table.leadId),
+  ],
+);
+
+export const adminAuditLog = sqliteTable(
+  "admin_audit_log",
+  {
+    id: text("id").primaryKey(),
+    actorEmail: text("actor_email").notNull(),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: text("entity_id").notNull(),
+    beforeSnapshot: text("before_snapshot"),
+    afterSnapshot: text("after_snapshot"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    index("admin_audit_entity_idx").on(table.entityType, table.entityId, table.createdAt),
+    index("admin_audit_actor_idx").on(table.actorEmail, table.createdAt),
   ],
 );

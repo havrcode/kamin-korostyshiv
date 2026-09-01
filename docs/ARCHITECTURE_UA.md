@@ -39,7 +39,7 @@ Next задає структуру сторінок через каталог `a
 ### Cloudflare Worker
 
 Worker — короткоживуча серверна функція, яка запускається на HTTP-запит. Це не
-постійно ввімкнений Node.js-сервер. У майбутньому він:
+постійно ввімкнений Node.js-сервер. Готовий Worker:
 
 - прийме заявку;
 - перевірить дані;
@@ -58,26 +58,37 @@ Worker — короткоживуча серверна функція, яка з
 
 ```text
 app/
+  admin/                     UI списку заявок і зміни статусів
+  catalog/                   каталог, category і product routes
   components/
+    catalog-shell.tsx        спільні header/footer внутрішніх сторінок
+    product-card.tsx         картка товару
     ui-icon.tsx              спільні SVG-іконки
     reveal-observer.tsx      появи секцій під час прокручування
   data/
-    catalog.ts               категорії, камінь, FAQ, значення форми
+    catalog.ts               5 категорій, 9 товарів, камінь і FAQ
+  privacy/                   чесна політика demo/production
+  robots.ts, sitemap.ts      SEO-файли зі статичного джерела даних
   layout.tsx                 HTML-оболонка й SEO metadata
   page.tsx                   головна сторінка та її інтерактивний стан
   site-config.ts             контакти, робоча назва й публічна адреса
   globals.css                уся візуальна система й адаптивність
 db/
   index.ts                   майбутнє створення Drizzle-клієнта для D1
-  schema.ts                  D1-схема заявок і outbox
+  schema.ts                  D1-схема заявок, outbox і admin audit
 database/
   migrations/
-    0000_closed_doctor_faustus.sql  перша незмінна SQL-міграція
+    0000...sql               заявки й outbox
+    0001...sql               product_id
+    0002...sql               admin_audit_log
 server/
+  admin/                     Access JWT і захищений admin API
+  estimates/                 internal/client calculator
   leads/
     http.ts                  HTTP-межа, розмір, rate limit і відповіді
     repository.ts            D1 batch, idempotency та публічний номер
     validation.ts            контракт, нормалізація й валідація заявки
+  security/turnstile.ts      server-side anti-bot перевірка
 tests/
   rendered-html.test.mjs     smoke-перевірка зібраної сторінки
   lead-validation.test.ts    unit-тести серверної межі заявки
@@ -86,7 +97,7 @@ tests/
 worker/
   index.ts                   Cloudflare Worker entrypoint тільки для API
   wrangler.jsonc             базова конфігурація сухої збірки
-public/                      статичні зображення, favicon, Open Graph
+public/                      9 WebP-візуалізацій, favicon, Open Graph
 .openai/hosting.json         зв’язок саме з поточним ChatGPT Sites
 next.config.ts               статичний output: export
 out/                         результат build; не зберігається в Git
@@ -101,7 +112,7 @@ out/                         результат build; не зберігаєть
 5. React виконує hydration: під’єднує обробники до вже видимого HTML.
 6. Після hydration працюють меню, вкладки каменю, вибір категорії та форма.
 
-Пізніше `POST /api/v1/leads` піде в окремий Cloudflare Worker. Тому публічний
+У власному Cloudflare `POST /api/v1/leads` іде в окремий Worker. Тому публічний
 контент не витрачає Worker CPU, а серверний код запускається лише там, де
 справді потрібні перевірка, D1, Telegram або авторизація.
 
@@ -117,7 +128,9 @@ out/                         результат build; не зберігаєть
 | `menuOpen` | boolean | чи відкрите мобільне меню |
 | `activeStone` | number | індекс вибраного каменю |
 | `selectedInterest` | string | значення, яке має бути у select форми |
-| `submitted` | boolean | чи показувати форму або екран чернетки |
+| `selectedProductId` | string | стабільний ID товару з URL |
+| `submitState` | union | idle/submitting/preview/success/error |
+| `publicNumber` | string | серверний номер збереженої заявки |
 
 `currentStone` створюється через `useMemo`. Він бере `stones[activeStone]` і
 перераховується тільки після зміни `activeStone`.
@@ -144,19 +157,20 @@ Cleanup важливий: без нього слухачі накопичува�
 5. `selected-interest` показує коротке підтвердження над формою.
 6. `setSubmitted(false)` повертає форму, якщо раніше показувався результат.
 
-Посилання картки одночасно має `href="#contact"`, тому браузер прокручує до
-форми без спеціальної бібліотеки. Коли з’являться товари, функція прийматиме
-`categoryId` і `productId`, а не тільки текст.
+Категорійна картка веде на окрему сторінку. Товарний CTA повертає на головну з
+`interest` і `productId` у query; effect перевіряє довжину/формат і підставляє
+обидва значення у форму.
 
 ### `submitForm(event)`
 
-1. Браузер генерує submit-подію.
-2. `event.preventDefault()` не дозволяє перезавантажити сторінку.
-3. `setSubmitted(true)` показує екран чернетки.
-
-Це навмисно НЕ реальна заявка. Текст прямо повідомляє, що дані не надіслано.
-Після v0.2.0 ця функція викликатиме API, матиме `idle/loading/success/error`,
-а success показуватиметься тільки після відповіді сервера з номером заявки.
+1. Браузер генерує submit-подію, `preventDefault()` не перезавантажує сторінку.
+2. Якщо `siteConfig.leads.enabled === false`, стан стає `preview`: жодного
+   мережевого запиту немає.
+3. У production функція збирає FormData, додає category/product ID,
+   idempotency key і Turnstile token.
+4. `fetch('/api/v1/leads')` отримує success лише після D1 batch.
+5. UI показує `publicNumber`; будь-яка помилка переходить у `error`, а не
+   імітує успішне надсилання.
 
 ## 5. `RevealObserver()`
 
@@ -295,10 +309,10 @@ snapshot назв, повідомлення, статус, source URL, created/u
 React state → контрольована форма → API → server validation → D1 transaction →
 outbox → Telegram → адмінка.
 
-## 12. Реалізована основа заявки у 0.1.3
+## 12. Серверна межа заявки
 
-`server/leads/validation.ts` уже є реальною серверною межею майбутнього API,
-хоча сам HTTP endpoint поки не ввімкнений. `validateLeadInput(input)` приймає
+`server/leads/validation.ts` є реальною серверною межею API.
+`validateLeadInput(input)` приймає
 `unknown`, тому не довіряє типам із браузера, відкидає невідомі поля й повертає
 або нормалізовані дані, або структуровані коди помилок.
 
@@ -313,7 +327,8 @@ outbox → Telegram → адмінка.
 6. згода має бути явно `true`, а її версія фіксується як
    `lead-contact-v1`.
 
-`db/schema.ts` уже описує дві перші таблиці. `leads.idempotency_key` має
+`db/schema.ts` описує `leads`, `notification_outbox` і `admin_audit_log`.
+`leads.idempotency_key` має
 унікальне обмеження, тому повтор одного клієнтського запиту не створить другу
 заявку. `public_number` також унікальний і призначений для розмови з клієнтом.
 
@@ -321,9 +336,9 @@ outbox → Telegram → адмінка.
 індекс `status + next_attempt_at + locked_at` підготовлений для атомарного
 захоплення доступної пачки подій воркером. Стан `FAILED` не видаляє заявку.
 
-Файл `database/migrations/0000_closed_doctor_faustus.sql` згенерований із цієї
-схеми й не повинен редагуватися після застосування. Наступні зміни схеми
-створюватимуть нові міграції.
+Файли `database/migrations/0000...0002.sql` утворюють послідовну незмінну
+історію: базові заявки/outbox → `product_id` → audit log. Застосовану міграцію
+не редагують; наступна зміна схеми створює новий файл.
 
 У `.openai/hosting.json` D1 binding навмисно залишається `null`. Отже, поточний
 публічний Sites не збирає персональні дані: форма як і раніше показує тільки
@@ -343,11 +358,12 @@ outbox → Telegram → адмінка.
 1. дозволяє тільки шлях `/api/v1/leads` і метод `POST`;
 2. приймає тільки `application/json`;
 3. вимагає `Idempotency-Key` довжиною 16–128 безпечних символів;
-4. відмовляє з `503`, якщо D1 або rate limiter не підключені;
+4. відмовляє з `503`, якщо D1, rate limiter або Turnstile secret не підключені;
 5. читає stream із реальною межею 16 КіБ, навіть якщо `Content-Length` збрехав;
 6. викликає `validateLeadInput()`;
 7. перевіряє Cloudflare rate limit за контрольованим `CF-Connecting-IP`;
-8. тільки після цього передає нормалізовані дані в репозиторій.
+8. перевіряє Turnstile server-side;
+9. тільки після цього передає нормалізовані дані в репозиторій.
 
 Відповіді мають `Cache-Control: no-store`, `X-Content-Type-Options: nosniff` і
 окремий `X-Request-Id`. Лог помилки містить лише request ID та тип помилки —
@@ -382,7 +398,7 @@ Outbox-процесор складається з трьох вузьких мо
 - `server/notifications/telegram.ts` форматує повідомлення та викликає Bot API;
 - `server/notifications/processor.ts` поєднує доставку з retry/backoff;
 - `worker/index.ts` запускає одну негайну спробу через `waitUntil` і має
-  `scheduled()` handler для майбутнього Cron Trigger.
+  готовий `scheduled()` handler для Cron Trigger.
 
 ### Чому SELECT недостатньо
 
@@ -425,7 +441,7 @@ Worker прокинувся після повторного claim, його за
 | мережа, 408, 429 або 5xx | `PENDING` | 1 хв → 5 хв → 15 хв → 1 год → 6 год |
 | 429 із `retry_after` | `PENDING` | не раніше більшого з backoff і `retry_after` |
 | 4xx на кшталт 400/401/403 | `FAILED` | ручне виправлення конфігурації |
-| будь-яка невдача на 6-й спробі | `FAILED` | показати в майбутній адмінці |
+| будь-яка невдача на 6-й спробі | `FAILED` | перевірити через адмінський контур |
 
 `FAILED` є остаточним і автоматично не claim-иться. Сира відповідь Telegram,
 bot token, ім’я, телефон і повідомлення не логуються. До Bot API передається
@@ -438,3 +454,80 @@ HTML, але всі поля заявки спочатку екрануютьс�
 повертає лише технічний код `NOTIFICATION_SERVICE_NOT_CONFIGURED` і не
 захоплює рядки. Поточний Sites залишається статичним, тому ці secrets у нього
 не додані, реальна форма нічого не надсилає.
+
+## 15. Каталог і статичні маршрути v1.0.0
+
+`app/data/catalog.ts` є єдиним публічним джерелом demo-каталогу. `Category` і
+`Product` мають стабільні `id`, окремий `slug`, людський title, image/alt,
+materials/options і режим ціни. Всі дев’ять товарів мають `priceMode: "quote"`
+та `requiresManualReview: true`.
+
+`generateStaticParams()` перебирає масиви під час build. Next створює HTML для
+кожної категорії й кожного товару ще до deploy. `generateMetadata()` формує
+canonical/OG із тих самих даних, тому заголовок і картка не розходяться.
+`sitemap.ts` також перебирає ці самі ID/slug.
+
+`ProductCard` не знає бізнес-логіки: отримує готовий `Product` і створює
+посилання. На detail page CTA додає `productId` і snapshot назви до query.
+Якщо фото пізніше замінюється, ID заявки не змінюється.
+
+## 16. Turnstile і порядок приймання заявки
+
+Порядок у `handleLeadApiRequest()` навмисно такий:
+
+1. route/method/content type/idempotency;
+2. наявність D1, rate limiter і Turnstile secret;
+3. обмежене читання JSON до 16 КіБ;
+4. серверна нормалізація полів і honeypot;
+5. rate limit за `CF-Connecting-IP`;
+6. `verifyTurnstile()` через `siteverify` з timeout;
+7. атомарне D1-збереження й outbox;
+8. фоновий Telegram тільки для успішного `/api/v1/leads`.
+
+Rate limit стоїть перед зовнішнім siteverify, щоб заблокований IP не витрачав
+додаткові subrequests. Водночас body/validation стоять раніше, щоб не витрачати
+квоту на явно некоректний JSON. Без secret, binding або доступного Turnstile
+API код відмовляє; success без D1 неможливий.
+
+## 17. Cloudflare Access і `/admin`
+
+Публічний `out/admin/index.html` сам не містить даних. Він лише пробує GET
+`/api/v1/admin/leads`. У Sites API відсутній, тому UI чесно показує demo-state.
+
+У production Cloudflare Access перехоплює `/admin*` і `/api/v1/admin/*`.
+`verifyAdminAccess()` потім:
+
+1. читає `Cf-Access-Jwt-Assertion`;
+2. декодує header/payload, але ще не довіряє їм;
+3. завантажує JWK з team domain;
+4. перевіряє RS256 signature через Web Crypto;
+5. звіряє audience, expiry і `ADMIN_EMAILS`;
+6. повертає нормалізований email або fail-closed код.
+
+GET повертає до 100 заявок. PATCH дозволяє тільки визначені статуси, читає
+попередній стан і виконує batch `UPDATE lead + INSERT admin_audit_log`.
+Frontend не може обійти цю перевірку приховуванням кнопки.
+
+## 18. Внутрішній і клієнтський кошторис
+
+`calculateInternalEstimate(request, priceBook)` запускається тільки на сервері.
+Price book містить `costMinor`, `markupBps`, version і rounding. Кожне число
+перевіряється як safe integer, кількість обмежена, а відсутній код додає причину
+ручної перевірки замість fallback-ціни.
+
+Результат `InternalEstimate` не є API-відповіддю. Єдиний дозволений перехід —
+`toClientEstimate(internal)`. Він будує нові objects із дозволеним набором
+полів. Тест серіалізує результат і забороняє слова `cost` та `markup`. Реальний
+price book не додається в Git: його створюють у приватному D1/admin після
+погодження з майстром.
+
+## 19. Два режими одного коду
+
+| Режим | Статика | Заявка | Адмінка | Дані |
+|---|---|---|---|---|
+| Sites demo | повний сайт і каталог | тільки локальний preview | demo-state | не збираються |
+| Власний Cloudflare | ті самі assets | Turnstile → Worker → D1 | Access → API | D1 + secrets |
+
+Перемикач — build-time `NEXT_PUBLIC_LEADS_ENABLED`. Його не можна вмикати лише
+для «перевірки кнопки» без D1/Turnstile/політики: Worker правильно поверне 503.
+Покрокова активація описана в `docs/CLOUDFLARE_SETUP_UA.md`.

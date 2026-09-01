@@ -1,5 +1,6 @@
 import { createLeadWithOutbox, type D1DatabaseLike } from "./repository.ts";
 import { validateLeadInput } from "./validation.ts";
+import { verifyTurnstile, type TurnstileFetchLike } from "../security/turnstile.ts";
 
 const MAX_LEAD_BODY_BYTES = 16 * 1024;
 const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9_-]{16,128}$/;
@@ -15,6 +16,11 @@ export interface LeadRateLimiterLike {
 export interface LeadWorkerEnv {
   DB?: D1DatabaseLike;
   LEAD_RATE_LIMITER?: LeadRateLimiterLike;
+  TURNSTILE_SECRET_KEY?: string;
+}
+
+export interface LeadHandlerOptions {
+  turnstileFetcher?: TurnstileFetchLike;
 }
 
 type BodyReadResult =
@@ -104,6 +110,7 @@ function readSourceUrl(request: Request): string | null {
 export async function handleLeadApiRequest(
   request: Request,
   env: LeadWorkerEnv,
+  options: LeadHandlerOptions = {},
 ): Promise<Response> {
   const requestId = crypto.randomUUID();
   const url = new URL(request.url);
@@ -149,7 +156,7 @@ export async function handleLeadApiRequest(
     );
   }
 
-  if (!env.DB || !env.LEAD_RATE_LIMITER) {
+  if (!env.DB || !env.LEAD_RATE_LIMITER || !env.TURNSTILE_SECRET_KEY) {
     return jsonResponse(
       { ok: false, error: { code: "SERVICE_NOT_CONFIGURED" } },
       503,
@@ -177,6 +184,7 @@ export async function handleLeadApiRequest(
   }
 
   const clientIp = request.headers.get("CF-Connecting-IP") ?? "unknown";
+
   let rateLimit: RateLimitResult;
   try {
     rateLimit = await env.LEAD_RATE_LIMITER.limit({ key: `lead:${clientIp}` });
@@ -195,6 +203,24 @@ export async function handleLeadApiRequest(
       429,
       requestId,
       { "Retry-After": "120" },
+    );
+  }
+
+  const turnstile = await verifyTurnstile(
+    {
+      secret: env.TURNSTILE_SECRET_KEY,
+      token: validated.value.turnstileToken,
+      remoteIp: clientIp === "unknown" ? null : clientIp,
+      idempotencyKey,
+    },
+    options.turnstileFetcher,
+  );
+  if (!turnstile.ok) {
+    return jsonResponse(
+      { ok: false, error: { code: turnstile.code } },
+      turnstile.code === "TURNSTILE_REJECTED" ? 422 : 503,
+      requestId,
+      turnstile.code === "TURNSTILE_UNAVAILABLE" ? { "Retry-After": "60" } : {},
     );
   }
 

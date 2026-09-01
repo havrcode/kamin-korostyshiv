@@ -58,8 +58,10 @@ const validLead = {
   name: "Сергій",
   phoneNormalized: "+380660570987",
   categoryId: "single-monuments",
+  productId: "prod-single-vertical",
   categorySnapshot: "Одинарні пам’ятники",
   message: "Потрібна консультація",
+  turnstileToken: "test-token-valid-123",
   consentVersion: LEAD_CONSENT_VERSION,
 } satisfies ValidatedLeadInput;
 
@@ -100,6 +102,7 @@ test("creates a lead and its Telegram outbox event in one D1 batch", async () =>
     "Сергій",
     "+380660570987",
     "single-monuments",
+    "prod-single-vertical",
     "Одинарні пам’ятники",
     "Потрібна консультація",
     LEAD_CONSENT_VERSION,

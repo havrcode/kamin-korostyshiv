@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.publicUrl),
   title: "Камінь Коростишів — вироби з граніту та мармуру",
   description: "Пам’ятники, меморіальні комплекси, столи, лавки, вази та лампадки з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   openGraph: {
     title: "Камінь Коростишів",
     description: "Вироби з граніту та мармуру — від ідеї до встановлення.",

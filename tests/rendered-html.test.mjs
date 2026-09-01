@@ -11,8 +11,26 @@ test("renders the public contact foundation", async () => {
   assert.doesNotMatch(html, /localhost:3000/);
   assert.match(html, /href="tel:\+380660570987"/);
   assert.match(html, /\+380 66 057 09 87/);
-  assert.match(html, /Попередня версія: ця форма ще не надсилає персональні дані/);
+  assert.match(html, /Тестовий режим: форма не надсилає й не зберігає персональні дані/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
+  assert.doesNotMatch(html, /challenges\.cloudflare\.com\/turnstile/);
+});
+
+test("renders the complete static catalog, products, privacy and admin shell", async () => {
+  const catalog = await readFile(new URL("../out/catalog/index.html", import.meta.url), "utf8");
+  const product = await readFile(new URL("../out/catalog/rodynni-pamiatnyky/rodynna-na-trokh/index.html", import.meta.url), "utf8");
+  const privacy = await readFile(new URL("../out/privacy/index.html", import.meta.url), "utf8");
+  const admin = await readFile(new URL("../out/admin/index.html", import.meta.url), "utf8");
+  const sitemap = await readFile(new URL("../out/sitemap.xml", import.meta.url), "utf8");
+
+  assert.match(catalog, /Візуалізація/);
+  assert.match(catalog, /Після прорахунку/);
+  assert.match(product, /Родинна «На трьох»/);
+  assert.match(product, /prod-family-triple/);
+  assert.match(product, /Ручна перевірка/);
+  assert.match(privacy, /На публічному Sites серверне надсилання форми вимкнене/);
+  assert.match(admin, /Cloudflare Access/);
+  assert.match(sitemap, /rodynna-na-trokh/);
 });
 
 test("uses a static Next export without Vinext", async () => {

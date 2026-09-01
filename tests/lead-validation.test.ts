@@ -18,10 +18,12 @@ test("returns a normalized safe lead contract", () => {
     name: "  Сергій  ",
     phone: "+38 (066) 057-09-87",
     categoryId: "single-monuments",
+    productId: "prod-single-vertical",
     categorySnapshot: "Одинарні пам’ятники",
     message: "  Потрібна консультація  ",
     consentAccepted: true,
     website: "",
+    turnstileToken: "test-token-valid-123",
   });
 
   assert.equal(result.ok, true);
@@ -31,8 +33,10 @@ test("returns a normalized safe lead contract", () => {
     name: "Сергій",
     phoneNormalized: "+380660570987",
     categoryId: "single-monuments",
+    productId: "prod-single-vertical",
     categorySnapshot: "Одинарні пам’ятники",
     message: "Потрібна консультація",
+    turnstileToken: "test-token-valid-123",
     consentVersion: LEAD_CONSENT_VERSION,
   });
 });
@@ -42,10 +46,12 @@ test("rejects invalid fields and a filled honeypot", () => {
     name: "A",
     phone: "123",
     categoryId: "BAD ID",
+    productId: "BAD PRODUCT",
     categorySnapshot: "",
     message: "x".repeat(2001),
     consentAccepted: false,
     website: "https://spam.example",
+    turnstileToken: "x",
   });
 
   assert.equal(result.ok, false);
@@ -58,9 +64,11 @@ test("rejects invalid fields and a filled honeypot", () => {
       "INVALID_NAME",
       "INVALID_PHONE",
       "INVALID_CATEGORY_ID",
+      "INVALID_PRODUCT_ID",
       "INVALID_CATEGORY",
       "MESSAGE_TOO_LONG",
       "CONSENT_REQUIRED",
+      "TURNSTILE_REQUIRED",
     ]),
   );
 });

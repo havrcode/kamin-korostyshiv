@@ -1,6 +1,6 @@
 {
   "name": "kamin-korostyshiv",
-  "version": "0.1.5",
+  "version": "1.0.0",
   "private": true,
   "engines": {
     "node": ">=22.18.0"
@@ -35,5 +35,5 @@
     "wrangler": "4.92.0"
   },
   "type": "module",
-  "displayName": "\u041a\u0430\u043c\u0456\u043d\u044c \u041a\u043e\u0440\u043e\u0441\u0442\u0438\u0448\u0456\u0432 \u2014 \u0433\u0440\u0430\u043d\u0456\u0442 \u0442\u0430 \u043c\u0430\u0440\u043c\u0443\u0440"
+  "displayName": "Камінь Коростишів — граніт та мармур"
 }

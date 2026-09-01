@@ -5,9 +5,11 @@ export type LeadField =
   | "name"
   | "phone"
   | "categoryId"
+  | "productId"
   | "categorySnapshot"
   | "message"
-  | "consentAccepted";
+  | "consentAccepted"
+  | "turnstileToken";
 
 export interface LeadValidationError {
   field: LeadField;
@@ -19,8 +21,10 @@ export interface ValidatedLeadInput {
   name: string;
   phoneNormalized: string;
   categoryId: string | null;
+  productId: string | null;
   categorySnapshot: string;
   message: string | null;
+  turnstileToken: string;
   consentVersion: typeof LEAD_CONSENT_VERSION;
 }
 
@@ -62,9 +66,11 @@ export function validateLeadInput(input: unknown): LeadValidationResult {
   const name = readText(body.name);
   const phone = readText(body.phone);
   const categoryId = readText(body.categoryId);
+  const productId = readText(body.productId);
   const categorySnapshot = readText(body.categorySnapshot);
   const message = readText(body.message);
   const honeypot = readText(body.website);
+  const turnstileToken = readText(body.turnstileToken);
   const phoneNormalized = phone ? normalizeUkrainianPhone(phone) : null;
 
   if (honeypot) {
@@ -78,6 +84,9 @@ export function validateLeadInput(input: unknown): LeadValidationResult {
   }
   if (categoryId && !/^[a-z0-9][a-z0-9-]{1,79}$/.test(categoryId)) {
     errors.push({ field: "categoryId", code: "INVALID_CATEGORY_ID", message: "Некоректна категорія." });
+  }
+  if (productId && !/^[a-z0-9][a-z0-9-]{1,79}$/.test(productId)) {
+    errors.push({ field: "productId", code: "INVALID_PRODUCT_ID", message: "Некоректний виріб." });
   }
   if (!categorySnapshot || categorySnapshot.length < 2 || categorySnapshot.length > 120) {
     errors.push({
@@ -96,8 +105,15 @@ export function validateLeadInput(input: unknown): LeadValidationResult {
       message: "Потрібна згода на обробку даних для відповіді на звернення.",
     });
   }
+  if (!turnstileToken || turnstileToken.length < 10 || turnstileToken.length > 2048) {
+    errors.push({
+      field: "turnstileToken",
+      code: "TURNSTILE_REQUIRED",
+      message: "Підтвердьте, що звернення надсилає людина.",
+    });
+  }
 
-  if (errors.length > 0 || !name || !phoneNormalized || !categorySnapshot) {
+  if (errors.length > 0 || !name || !phoneNormalized || !categorySnapshot || !turnstileToken) {
     return { ok: false, errors };
   }
 
@@ -107,8 +123,10 @@ export function validateLeadInput(input: unknown): LeadValidationResult {
       name,
       phoneNormalized,
       categoryId: categoryId || null,
+      productId: productId || null,
       categorySnapshot,
       message: message || null,
+      turnstileToken,
       consentVersion: LEAD_CONSENT_VERSION,
     },
   };

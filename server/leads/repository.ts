@@ -87,9 +87,9 @@ export async function createLeadWithOutbox(
       .prepare(
         `INSERT INTO leads (
            id, public_number, idempotency_key, name, phone_normalized,
-           category_id, category_snapshot, message, status, consent_version,
+           category_id, product_id, category_snapshot, message, status, consent_version,
            source_url, created_at, updated_at
-         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?, ?, ?)`,
+         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'NEW', ?, ?, ?, ?)`,
       )
       .bind(
         leadId,
@@ -98,6 +98,7 @@ export async function createLeadWithOutbox(
         input.lead.name,
         input.lead.phoneNormalized,
         input.lead.categoryId,
+        input.lead.productId,
         input.lead.categorySnapshot,
         input.lead.message,
         input.lead.consentVersion,

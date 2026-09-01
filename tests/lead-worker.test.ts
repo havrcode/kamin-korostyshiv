@@ -60,10 +60,12 @@ function validRequest(headers: HeadersInit = {}): Request {
       name: "Сергій",
       phone: "+38 (066) 057-09-87",
       categoryId: "single-monuments",
+      productId: "prod-single-vertical",
       categorySnapshot: "Одинарні пам’ятники",
       message: "Потрібна консультація",
       consentAccepted: true,
       website: "",
+      turnstileToken: "test-token-valid-123",
     }),
   });
 }
@@ -74,13 +76,14 @@ test("accepts a valid lead only with D1 and rate-limit bindings", async () => {
 
   const response = await handleLeadApiRequest(validRequest(), {
     DB: database,
+    TURNSTILE_SECRET_KEY: "test-secret",
     LEAD_RATE_LIMITER: {
       async limit({ key }) {
         rateKeys.push(key);
         return { success: true };
       },
     },
-  });
+  }, { turnstileFetcher: async () => Response.json({ success: true }) });
   const body = (await response.json()) as {
     ok: boolean;
     lead: { publicNumber: string };
@@ -121,12 +124,13 @@ test("returns 429 without touching D1 when the rate limit is exceeded", async ()
   const database = new ApiDatabase();
   const response = await handleLeadApiRequest(validRequest(), {
     DB: database,
+    TURNSTILE_SECRET_KEY: "test-secret",
     LEAD_RATE_LIMITER: {
       async limit() {
         return { success: false };
       },
     },
-  });
+  }, { turnstileFetcher: async () => Response.json({ success: true }) });
   const body = (await response.json()) as { error: { code: string } };
 
   assert.equal(response.status, 429);
@@ -141,6 +145,7 @@ test("rejects a declared body larger than 16 KiB", async () => {
     validRequest({ "Content-Length": String(17 * 1024) }),
     {
       DB: database,
+      TURNSTILE_SECRET_KEY: "test-secret",
       LEAD_RATE_LIMITER: { async limit() { return { success: true }; } },
     },
   );

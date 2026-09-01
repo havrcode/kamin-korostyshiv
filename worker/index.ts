@@ -3,11 +3,16 @@ import {
   processNotificationOutbox,
   type NotificationWorkerEnv,
 } from "../server/notifications/processor.ts";
+import { handleAdminApiRequest, type AdminWorkerEnv } from "../server/admin/leads.ts";
 
-export type Env = LeadWorkerEnv & NotificationWorkerEnv;
+export type Env = LeadWorkerEnv & NotificationWorkerEnv & AdminWorkerEnv;
 
 export interface ExecutionContextLike {
   waitUntil(promise: Promise<unknown>): void;
+}
+
+export function shouldProcessOutbox(pathname: string, status: number): boolean {
+  return pathname === "/api/v1/leads" && (status === 200 || status === 201);
 }
 
 const worker = {
@@ -16,8 +21,11 @@ const worker = {
     env: Env,
     context?: ExecutionContextLike,
   ): Promise<Response> {
-    const response = await handleLeadApiRequest(request, env);
-    if ((response.status === 200 || response.status === 201) && context) {
+    const url = new URL(request.url);
+    const response = url.pathname.startsWith("/api/v1/admin/")
+      ? await handleAdminApiRequest(request, env)
+      : await handleLeadApiRequest(request, env);
+    if (shouldProcessOutbox(url.pathname, response.status) && context) {
       context.waitUntil(processNotificationOutbox(env, { limit: 1 }));
     }
     return response;
