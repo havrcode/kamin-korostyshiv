@@ -3,7 +3,7 @@ import { CatalogShell } from "../components/catalog-shell";
 import { AdminLeads } from "./admin-leads";
 
 export const metadata: Metadata = {
-  title: "Адмінка — Камінь Коростишів",
+  title: "Адмінка — Kaminchyk",
   robots: { index: false, follow: false, noarchive: true },
 };
 

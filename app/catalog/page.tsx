@@ -6,7 +6,7 @@ import { categories, getProductsByCategory } from "../data/catalog";
 import { siteConfig } from "../site-config";
 
 export const metadata: Metadata = {
-  title: "Каталог виробів із граніту та мармуру — Камінь Коростишів",
+  title: "Каталог виробів із граніту та мармуру — Kaminchyk",
   description: "Демонстраційний каталог пам’ятників, меморіальних комплексів, облаштування ділянок, сходів, підвіконь і стільниць із натурального каменю.",
   alternates: { canonical: "/catalog/" },
 };

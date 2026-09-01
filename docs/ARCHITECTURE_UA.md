@@ -1,4 +1,4 @@
-# Архітектура й робота коду «Камінь Коростишів»
+# Архітектура й робота коду Kaminchyk
 
 Цей файл — навчальна карта проєкту. Він пояснює не тільки «що лежить у файлі»,
 а й хто кого викликає, де живуть дані та де проходить межа безпеки.
@@ -61,7 +61,9 @@ app/
   admin/                     UI списку заявок і зміни статусів
   catalog/                   каталог, category і product routes
   components/
+    brand-logo.tsx           вибір затвердженого light/dark K-логотипа
     catalog-shell.tsx        спільні header/footer внутрішніх сторінок
+    messenger-links.tsx      централізовані Telegram і Viber CTA
     product-card.tsx         картка товару
     ui-icon.tsx              спільні SVG-іконки
     reveal-observer.tsx      появи секцій під час прокручування
@@ -71,7 +73,7 @@ app/
   robots.ts, sitemap.ts      SEO-файли зі статичного джерела даних
   layout.tsx                 HTML-оболонка й SEO metadata
   page.tsx                   головна сторінка та її інтерактивний стан
-  site-config.ts             контакти, робоча назва й публічна адреса
+  site-config.ts             бренд, контакти, месенджери й публічна адреса
   globals.css                уся візуальна система й адаптивність
 db/
   index.ts                   майбутнє створення Drizzle-клієнта для D1
@@ -97,7 +99,12 @@ tests/
 worker/
   index.ts                   Cloudflare Worker entrypoint тільки для API
   wrangler.jsonc             базова конфігурація сухої збірки
-public/                      9 WebP-візуалізацій, favicon, Open Graph
+public/
+  brand/kaminchyk/           12 затверджених прозорих PNG і checksums
+  brand/archive/             попередня емблема та favicon
+  og-kaminchyk.jpg           активний Open Graph із K-емблемою
+  og.png                     попередній неактивний Open Graph
+  visual-*.webp              9 тимчасових товарних візуалізацій
 .openai/hosting.json         зв’язок саме з поточним ChatGPT Sites
 next.config.ts               статичний output: export
 out/                         результат build; не зберігається в Git
@@ -115,6 +122,23 @@ out/                         результат build; не зберігаєть
 У власному Cloudflare `POST /api/v1/leads` іде в окремий Worker. Тому публічний
 контент не витрачає Worker CPU, а серверний код запускається лише там, де
 справді потрібні перевірка, D1, Telegram або авторизація.
+
+### Бренд і швидкі контакти
+
+`siteConfig.brand` зберігає назву та шляхи до активної K-емблеми. Компонент
+`BrandLogo` не дублює рядки шляхів у сторінках: він отримує лише `tone` й
+`emblemOnly`, після чого вибирає правильний затверджений PNG. Тому майбутня
+заміна активної емблеми відбувається централізовано.
+
+`siteConfig.phone` є первинним контактом. `siteConfig.messengers` зберігає
+Telegram і Viber. `MessengerLinks` повторно використовується на першому екрані,
+у контактному блоці, мобільному меню та футері. Instagram навмисно не має
+порожньої кнопки: його буде додано лише разом зі справжнім username.
+
+У desktop-header номер постійно видимий. На вузькому екрані залишається
+компактний номер у шапці, а під основними hero-кнопками є великий `tel:` CTA і
+дві кнопки месенджерів. Так навіть людина, яка не користується формами, одразу
+бачить звичний спосіб зв’язку.
 
 ## 4. `Home()` у `app/page.tsx`
 

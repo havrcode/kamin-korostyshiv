@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
   const category = getCategory(categorySlug);
   if (!category) return {};
   return {
-    title: `${category.title} — каталог Камінь Коростишів`,
+    title: `${category.title} — каталог Kaminchyk`,
     description: category.text,
     alternates: { canonical: `/catalog/${category.slug}/` },
     openGraph: { images: [{ url: category.image, width: 1200, height: 800, alt: category.title }] },

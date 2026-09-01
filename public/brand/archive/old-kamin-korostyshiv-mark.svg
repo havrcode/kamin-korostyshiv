@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180" role="img" aria-labelledby="title desc">
+  <title id="title">Попередня емблема Камінь Коростишів</title>
+  <desc id="desc">Архівна версія логотипа: ромб із літерою K та стара робоча назва.</desc>
+  <g fill="none" stroke="#16191c" stroke-width="3">
+    <rect x="34" y="45" width="72" height="72" transform="rotate(45 70 81)"/>
+  </g>
+  <text x="70" y="94" fill="#16191c" font-family="Georgia,serif" font-size="48" text-anchor="middle">K</text>
+  <g fill="#16191c" font-family="Arial,sans-serif">
+    <text x="150" y="79" font-size="42" font-weight="600" letter-spacing="7">КАМІНЬ</text>
+    <text x="153" y="111" font-size="20" letter-spacing="6">КОРОСТИШІВ</text>
+  </g>
+</svg>

@@ -3,8 +3,8 @@ import { CatalogShell } from "../components/catalog-shell";
 import { siteConfig } from "../site-config";
 
 export const metadata: Metadata = {
-  title: "Конфіденційність — Камінь Коростишів",
-  description: "Як сайт Камінь Коростишів працює з контактними даними у формі звернення.",
+  title: "Конфіденційність — Kaminchyk",
+  description: "Як сайт Kaminchyk працює з контактними даними у формі звернення.",
   alternates: { canonical: "/privacy/" },
 };
 

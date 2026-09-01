@@ -6,6 +6,8 @@ import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import Script from "next/script";
 import Link from "next/link";
+import { BrandLogo } from "./components/brand-logo";
+import { MessengerLinks } from "./components/messenger-links";
 import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
 import { categories, faqs, interestOptions, resolveProductSelection, stones } from "./data/catalog";
@@ -110,13 +112,17 @@ export default function Home() {
 
       <header className="site-header">
         <a className="brand" href="#top" aria-label={`${siteConfig.workingName} — на головну`}>
-          <span className="brand-mark" aria-hidden="true"><span>K</span></span>
-          <span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span>
+          <BrandLogo />
         </a>
         <nav className="desktop-nav" aria-label="Головна навігація">
           <a href="#catalog">Каталог</a><a href="#process">Як ми працюємо</a><a href="#stone">Види каменю</a><a href="#about">Про нас</a>
         </nav>
-        <a className="header-cta" href="#contact"><span>Прорахувати вартість</span><Icon name="arrow" /></a>
+        <div className="header-actions">
+          <a className="header-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}>
+            <span><small>Консультація</small><b>{siteConfig.phone.display}</b></span><Icon name="phone" />
+          </a>
+          <a className="header-cta" href="#contact"><span>Прорахувати</span><Icon name="arrow" /></a>
+        </div>
         <button
           className="menu-button"
           type="button"
@@ -141,8 +147,11 @@ export default function Home() {
           {[["Каталог", "catalog"], ["Як ми працюємо", "process"], ["Види каменю", "stone"], ["Про нас", "about"], ["Контакти", "contact"]].map(([label, id]) => (
             <a href={`#${id}`} onClick={() => setMenuOpen(false)} key={id}>{label}<Icon name="arrow" /></a>
           ))}
-          <a href={siteConfig.phone.href} onClick={() => setMenuOpen(false)}>Зателефонувати<Icon name="phone" /></a>
+          <a href={siteConfig.phone.href} onClick={() => setMenuOpen(false)}>
+            <span>Зателефонувати<small>{siteConfig.phone.display}</small></span><Icon name="phone" />
+          </a>
         </nav>
+        <MessengerLinks className="mobile-menu-messengers" />
       </div>
 
       <section className="hero" id="top">
@@ -152,6 +161,12 @@ export default function Home() {
           <h1>Пам’ять у камені.<br /><em className="hero-craft">Майстерність</em> у деталях.</h1>
           <p className="hero-lead">Пам’ятники, меморіальні комплекси та вироби з натурального граніту й мармуру — від вибору матеріалу та узгодження проєкту до встановлення.</p>
           <div className="hero-actions"><a className="button primary" href="#catalog">Переглянути каталог <Icon name="arrow" /></a><a className="button glass" href="#contact">Обговорити ваш проєкт</a></div>
+          <div className="hero-contact-bar" aria-label="Швидкий зв’язок">
+            <a className="hero-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}>
+              <Icon name="phone" /><span><small>Зателефонувати</small><b>{siteConfig.phone.display}</b></span>
+            </a>
+            <MessengerLinks className="hero-messengers" />
+          </div>
         </div>
         <div className="hero-facts content-wrap" aria-label="Переваги" data-reveal>
           <div><Icon name="cube" /><span><b>Точний проєкт</b><small>усі деталі до початку робіт</small></span></div>
@@ -217,7 +232,7 @@ export default function Home() {
       </section>
 
       <section className="contact-section" id="contact"><div className="content-wrap contact-grid" data-reveal>
-        <div className="contact-copy"><p className="eyebrow light"><span></span>Почнімо з розмови</p><h2>Розкажіть, який виріб<br />ви хочете <em>створити.</em></h2><p>{siteConfig.leads.enabled ? "Залиште контакт і короткий опис. Заявка спочатку надійно збережеться, а потім майстер отримає сповіщення." : "Форма повністю підготовлена, але збір персональних даних у тестовій версії вимкнено до підключення власного Cloudflare та підтвердження правил зберігання. Найшвидший зв’язок зараз — телефон."}</p><a className="contact-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span><small>Телефон для консультації</small><b>{siteConfig.phone.display}</b></span></a><div className="contact-note"><Icon name="check" /><span><b>Без поспішних рішень</b><small>Спочатку обговорення, матеріал і проєкт — потім виробництво.</small></span></div></div>
+        <div className="contact-copy"><p className="eyebrow light"><span></span>Почнімо з розмови</p><h2>Розкажіть, який виріб<br />ви хочете <em>створити.</em></h2><p>{siteConfig.leads.enabled ? "Залиште контакт і короткий опис. Заявка спочатку надійно збережеться, а потім майстер отримає сповіщення." : "Форма повністю підготовлена, але збір персональних даних у тестовій версії вимкнено до підключення власного Cloudflare та підтвердження правил зберігання. Найшвидший зв’язок зараз — телефон."}</p><a className="contact-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span><small>Телефон для консультації</small><b>{siteConfig.phone.display}</b></span></a><MessengerLinks className="contact-messengers" /><div className="contact-note"><Icon name="check" /><span><b>Без поспішних рішень</b><small>Спочатку обговорення, матеріал і проєкт — потім виробництво.</small></span></div></div>
         {(submitState === "preview" || submitState === "success") ? <div className="form-success" role="status"><span><Icon name="check" /></span><h3>{submitState === "success" ? `Заявку ${publicNumber} збережено` : "Чернетку заявки підготовлено"}</h3><p>{submitState === "success" ? "Майстер отримає сповіщення й зв’яжеться з вами. Збережіть номер заявки." : <>Дані нікуди не надсилалися: на публічному Sites збір персональних даних вимкнений. Зателефонуйте за номером <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>.</>}</p><button type="button" onClick={() => setSubmitState("idle")}>Повернутися до форми</button></div> :
           <form className="contact-form" onSubmit={submitForm} aria-describedby="form-preview-note">
             {selectedInterest && <p className="selected-interest full"><Icon name="check" />Обрано: <b>{selectedProductLabel || selectedInterest}</b></p>}
@@ -225,7 +240,7 @@ export default function Home() {
           </form>}
       </div></section>
 
-      <footer><div className="content-wrap footer-top"><div className="brand footer-brand"><span className="brand-mark"><span>K</span></span><span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span></div><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a><a href="/privacy/">Конфіденційність</a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Демонстраційний каталог.</span><span>Україна · {siteConfig.location}</span></div></footer>
+      <footer><div className="content-wrap footer-top"><a className="brand footer-brand" href="#top" aria-label={`${siteConfig.workingName} — на початок`}><BrandLogo /></a><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a><MessengerLinks className="footer-messengers" /><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a><a href="/privacy/">Конфіденційність</a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Демонстраційний каталог.</span><span>Україна · {siteConfig.location}</span></div></footer>
       <a className="floating-contact" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span>Зателефонувати</span></a>
     </main>
   );

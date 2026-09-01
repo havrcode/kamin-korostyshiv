@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { BrandLogo } from "./brand-logo";
+import { MessengerLinks } from "./messenger-links";
 import { Icon } from "./ui-icon";
 import { siteConfig } from "../site-config";
 
@@ -7,8 +9,7 @@ export function CatalogHeader() {
   return (
     <header className="catalog-header">
       <Link className="brand" href="/" aria-label={`${siteConfig.workingName} — на головну`}>
-        <span className="brand-mark" aria-hidden="true"><span>K</span></span>
-        <span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span>
+        <BrandLogo />
       </Link>
       <nav aria-label="Навігація каталогу">
         <Link href="/">Головна</Link>
@@ -26,10 +27,11 @@ export function CatalogFooter() {
   return (
     <footer>
       <div className="content-wrap footer-top">
-        <div className="brand footer-brand"><span className="brand-mark"><span>K</span></span><span className="brand-copy"><b>КАМІНЬ</b><small>КОРОСТИШІВ</small></span></div>
+        <Link className="brand footer-brand" href="/" aria-label={`${siteConfig.workingName} — на головну`}><BrandLogo /></Link>
         <p>{siteConfig.description}</p>
         <div className="footer-actions">
           <a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a>
+          <MessengerLinks className="footer-messengers" />
           <Link href="/#contact">Запросити прорахунок <Icon name="arrow" /></Link>
           <Link href="/privacy/">Конфіденційність</Link>
         </div>

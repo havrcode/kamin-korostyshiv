@@ -6,11 +6,15 @@ test("renders the public contact foundation", async () => {
   const html = await readFile(new URL("../out/index.html", import.meta.url), "utf8");
 
   assert.match(html, /<html lang="uk">/);
-  assert.match(html, /<title>Камінь Коростишів/);
-  assert.match(html, /https:\/\/kamin-korostyshiv\.dev-mr-serg\.chatgpt\.site\/og\.png/);
+  assert.match(html, /<title>Kaminchyk/);
+  assert.match(html, /https:\/\/kamin-korostyshiv\.dev-mr-serg\.chatgpt\.site\/og-kaminchyk\.jpg/);
   assert.doesNotMatch(html, /localhost:3000/);
   assert.match(html, /href="tel:\+380660570987"/);
   assert.match(html, /\+380 66 057 09 87/);
+  assert.match(html, /Kaminchyk-K-full-light\.png/);
+  assert.match(html, /href="https:\/\/t\.me\/\+380660570987"/);
+  assert.match(html, /href="viber:\/\/chat\?number=%2B380660570987"/);
+  assert.match(html, /Швидкий зв’язок/);
   assert.match(html, /Тестовий режим: форма не надсилає й не зберігає персональні дані/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
   assert.doesNotMatch(html, /challenges\.cloudflare\.com\/turnstile/);

@@ -4,23 +4,27 @@ import { siteConfig } from "./site-config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.publicUrl),
-  title: "Камінь Коростишів — вироби з граніту та мармуру",
+  title: "Kaminchyk — вироби з граніту та мармуру",
   description: "Пам’ятники, меморіальні комплекси, столи, лавки, вази та лампадки з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
-    title: "Камінь Коростишів",
+    title: "Kaminchyk",
     description: "Вироби з граніту та мармуру — від ідеї до встановлення.",
     type: "website",
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Камінь Коростишів — вироби з граніту та мармуру" }],
+    images: [{ url: "/og-kaminchyk.jpg", width: 1200, height: 630, alt: "Kaminchyk — вироби з граніту та мармуру" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Камінь Коростишів",
+    title: "Kaminchyk",
     description: "Вироби з граніту та мармуру — від ідеї до встановлення.",
-    images: ["/og.png"],
+    images: ["/og-kaminchyk.jpg"],
   },
-  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
+  icons: {
+    icon: siteConfig.brand.logo.emblemDark,
+    shortcut: siteConfig.brand.logo.emblemDark,
+    apple: siteConfig.brand.logo.emblemDark,
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

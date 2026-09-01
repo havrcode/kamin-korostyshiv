@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
   const product = category && getProduct(category.id, productSlug);
   if (!category || !product) return {};
   return {
-    title: `${product.title} — Камінь Коростишів`,
+    title: `${product.title} — Kaminchyk`,
     description: product.summary,
     alternates: { canonical: `/catalog/${category.slug}/${product.slug}/` },
     openGraph: { title: product.title, description: product.summary, images: [{ url: product.image, width: 1200, height: 800, alt: product.imageAlt }] },
