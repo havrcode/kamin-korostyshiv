@@ -337,6 +337,24 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
 .admin-table td a, .admin-table td small { display: block; margin-top: 5px; color: var(--muted); }
 .admin-table select { min-width: 130px; padding: 8px; border: 1px solid var(--line); background: #fff; }
 
+/* На широкому екрані контакти є одним легким рядком, а не третім набором CTA. */
+@media (min-width: 721px) {
+  .hero-content { padding-top: clamp(165px, 20vh, 205px); }
+  .hero-content > .eyebrow { margin-bottom: 20px; }
+  .hero-lead { margin-top: 26px; }
+  .hero-actions { margin-top: 30px; }
+  .hero-contact-bar { min-height: 40px; margin-top: 14px; align-items: center; gap: 0; padding-inline: 4px; background: rgba(13,15,16,.24); backdrop-filter: blur(8px); }
+  .hero-phone { min-height: 40px; padding: 0 14px 0 10px; gap: 9px; border: 0; background: transparent; backdrop-filter: none; }
+  .hero-phone > svg { width: 17px; height: 17px; }
+  .hero-phone small { display: none; }
+  .hero-phone b { font-size: 16px; }
+  .hero-messengers { gap: 0; }
+  .hero-messengers a { min-height: 28px; padding-inline: 13px; border: 0; border-left: 1px solid rgba(255,255,255,.18); background: transparent; backdrop-filter: none; }
+  .hero-contact-bar a { transition: background-color .2s ease, color .2s ease; }
+  .hero-contact-bar a:hover, .hero-contact-bar a:focus-visible { background: rgba(255,255,255,.08); color: #fff; }
+  .floating-contact { display: none; }
+}
+
 @media (max-width: 1000px) {
   .desktop-nav, .header-cta { display: none; }
   .site-header { grid-template-columns: 1fr auto auto; column-gap: 14px; }

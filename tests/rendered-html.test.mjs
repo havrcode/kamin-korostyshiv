@@ -63,3 +63,22 @@ test("centers the animated hero facts without a transform conflict", async () =>
   assert.match(heroFactsRule, /margin-inline:\s*auto/);
   assert.doesNotMatch(heroFactsRule, /translateX/);
 });
+
+test("keeps the desktop contact strip compact without changing mobile controls", async () => {
+  const css = await readFile(
+    new URL("../app/globals.css", import.meta.url),
+    "utf8",
+  );
+  const desktopStart = css.indexOf("@media (min-width: 721px)");
+  const mobileStart = css.indexOf("@media (max-width: 720px)");
+  const desktopCss = css.slice(desktopStart, mobileStart);
+  const mobileCss = css.slice(mobileStart);
+
+  assert.notEqual(desktopStart, -1);
+  assert.notEqual(mobileStart, -1);
+  assert.match(desktopCss, /\.hero-phone small\s*\{\s*display:\s*none/);
+  assert.match(desktopCss, /\.floating-contact\s*\{\s*display:\s*none/);
+  assert.match(desktopCss, /border-left:\s*1px solid rgba\(255,255,255,\.18\)/);
+  assert.match(mobileCss, /\.hero-contact-bar\s*\{\s*width:\s*min\(100%, 360px\)/);
+  assert.match(mobileCss, /\.floating-contact\s*\{[^}]*width:\s*50px/);
+});
