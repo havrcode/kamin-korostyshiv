@@ -20,6 +20,7 @@
 | `v0.1.4` | Worker API, idempotency, rate limit, атомарний D1 batch |
 | `v0.1.5` | Надійний Telegram outbox, retry, lease і Cron |
 | `v1.0.0` | Повний демо-продукт: каталог, visuals, Turnstile, Access admin, кошторис, SEO, інструкції |
+| `v1.0.1` | Жива UI-перевірка й виправлення category/product стану форми |
 
 ## 3. Межа релізу v1.0.0
 

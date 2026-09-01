@@ -262,6 +262,17 @@ export function getProduct(categoryId: string, productSlug: string) {
   );
 }
 
+export function resolveProductSelection(productId: string, interest: string | null) {
+  const product = products.find(({ id }) => id === productId);
+  const category = product && categories.find(({ id }) => id === product.categoryId);
+  if (!product || !category) return null;
+  return {
+    productId: product.id,
+    categoryValue: category.formValue,
+    label: (interest?.trim() || product.title).slice(0, 120),
+  };
+}
+
 export const stones = [
   { name: "Габро", origin: "Глибокий чорний", color: "#161719", grain: "#3a3b3e" },
   { name: "Покостівський", origin: "Стриманий сірий", color: "#777a7b", grain: "#b5b5af" },

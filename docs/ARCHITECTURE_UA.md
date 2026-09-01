@@ -129,6 +129,7 @@ out/                         результат build; не зберігаєть
 | `activeStone` | number | індекс вибраного каменю |
 | `selectedInterest` | string | значення, яке має бути у select форми |
 | `selectedProductId` | string | стабільний ID товару з URL |
+| `selectedProductLabel` | string | людський snapshot товару для UI/заявки |
 | `submitState` | union | idle/submitting/preview/success/error |
 | `publicNumber` | string | серверний номер збереженої заявки |
 
@@ -158,8 +159,9 @@ Cleanup важливий: без нього слухачі накопичува�
 6. `setSubmitted(false)` повертає форму, якщо раніше показувався результат.
 
 Категорійна картка веде на окрему сторінку. Товарний CTA повертає на головну з
-`interest` і `productId` у query; effect перевіряє довжину/формат і підставляє
-обидва значення у форму.
+`interest` і `productId` у query; effect знаходить товар у локальному каталозі,
+підставляє валідний `category.formValue` у select та окремо зберігає людський
+snapshot. Невідомий `productId` не приймається лише через довірений URL.
 
 ### `submitForm(event)`
 
