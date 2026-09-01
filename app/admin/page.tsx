@@ -13,8 +13,13 @@ export default function AdminPage() {
       <section className="admin-page content-wrap">
         <p className="eyebrow"><span></span>Захищений робочий простір</p>
         <h1>Заявки</h1>
-        <p>У production цей маршрут закриває Cloudflare Access. Навіть якщо HTML сторінки відкриється, API не поверне жодних даних без чинного підписаного Access JWT та дозволеної email-адреси.</p>
+        <p>Це готовий модуль заявок: у production маршрут закриває Cloudflare Access, а API не повертає даних без чинного підписаного Access JWT та дозволеної email-адреси.</p>
         <AdminLeads />
+        <section className="admin-catalog-status">
+          <p className="eyebrow"><span></span>Наступний модуль</p>
+          <h2>Керування каталогом</h2>
+          <p>Категорії й товари вже мають окремий статус публікації: приховані позиції не потрапляють у каталог, форму, окремі сторінки та sitemap. Перемикачі в адмінці підключатимуться разом із власним Cloudflare й D1, щоб зміна справді впливала на публічний сайт, а не була декоративною кнопкою.</p>
+        </section>
       </section>
     </CatalogShell>
   );

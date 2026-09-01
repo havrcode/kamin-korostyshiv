@@ -3,10 +3,10 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CatalogShell } from "../../components/catalog-shell";
 import { ProductCard } from "../../components/product-card";
-import { categories, getCategory, getProductsByCategory } from "../../data/catalog";
+import { getCategory, getProductsByCategory, publishedCategories } from "../../data/catalog";
 
 export function generateStaticParams() {
-  return categories.map((category) => ({ categorySlug: category.slug }));
+  return publishedCategories.map((category) => ({ categorySlug: category.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ categorySlug: string }> }): Promise<Metadata> {

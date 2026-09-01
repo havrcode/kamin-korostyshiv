@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CatalogShell } from "../components/catalog-shell";
 import { ProductCard } from "../components/product-card";
-import { categories, getProductsByCategory } from "../data/catalog";
+import { getProductsByCategory, publishedCategories } from "../data/catalog";
 import { siteConfig } from "../site-config";
 
 export const metadata: Metadata = {
@@ -22,12 +22,12 @@ export default function CatalogPage() {
       </section>
 
       <nav className="catalog-category-nav content-wrap" aria-label="Категорії каталогу">
-        {categories.map((category) => (
+        {publishedCategories.map((category) => (
           <a href={`#${category.slug}`} key={category.id}>{category.title}<span>{getProductsByCategory(category.id).length}</span></a>
         ))}
       </nav>
 
-      {categories.map((category) => {
+      {publishedCategories.map((category) => {
         const categoryProducts = getProductsByCategory(category.id);
         return (
           <section className="catalog-group content-wrap" id={category.slug} key={category.id}>

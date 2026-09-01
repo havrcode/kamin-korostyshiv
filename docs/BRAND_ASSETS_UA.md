@@ -67,5 +67,6 @@ public/og-kaminchyk.jpg      активний соціальний preview
 
 Телефон є первинним каналом: `+380 66 057 09 87`. Telegram і Viber —
 додаткові канали. Instagram не показується, доки немає затвердженого username.
-Персональне Viber-посилання відкриває застосунок на сумісному пристрої; після
-створення Viber Business його слід замінити офіційним web chat link.
+До створення Viber Business кнопка Viber копіює номер без ненадійного
+персонального deep link. Офіційний `viber.me/...` підключається через
+`NEXT_PUBLIC_VIBER_CHAT_URL` після реєстрації Business Account.

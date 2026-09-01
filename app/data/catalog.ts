@@ -2,6 +2,7 @@ export type PriceMode = "quote";
 
 export type CatalogCategory = {
   id: string;
+  published: boolean;
   slug: string;
   title: string;
   formValue: string;
@@ -14,6 +15,7 @@ export type CatalogCategory = {
 
 export type CatalogProduct = {
   id: string;
+  published: boolean;
   categoryId: string;
   slug: string;
   title: string;
@@ -40,6 +42,7 @@ export type CatalogProduct = {
 export const categories: CatalogCategory[] = [
   {
     id: "cat-single",
+    published: true,
     slug: "odynarni-pamiatnyky",
     title: "Одинарні пам’ятники",
     formValue: "Одинарний пам’ятник",
@@ -51,6 +54,7 @@ export const categories: CatalogCategory[] = [
   },
   {
     id: "cat-family",
+    published: true,
     slug: "rodynni-pamiatnyky",
     title: "Родинні пам’ятники",
     formValue: "Подвійний або родинний пам’ятник",
@@ -62,6 +66,7 @@ export const categories: CatalogCategory[] = [
   },
   {
     id: "cat-complex",
+    published: true,
     slug: "memorialni-kompleksy",
     title: "Меморіальні комплекси",
     formValue: "Меморіальний комплекс",
@@ -73,6 +78,7 @@ export const categories: CatalogCategory[] = [
   },
   {
     id: "cat-site",
+    published: true,
     slug: "oblashtuvannia-dilianky",
     title: "Облаштування ділянки",
     formValue: "Облаштування ділянки",
@@ -84,6 +90,7 @@ export const categories: CatalogCategory[] = [
   },
   {
     id: "cat-architecture",
+    published: true,
     slug: "arkhitekturnyi-kamin",
     title: "Камінь для дому",
     formValue: "Архітектурний виріб із каменю",
@@ -98,6 +105,7 @@ export const categories: CatalogCategory[] = [
 export const products: CatalogProduct[] = [
   {
     id: "prod-single-vertical",
+    published: true,
     categoryId: "cat-single",
     slug: "vertikal-klasyka",
     title: "Вертикаль «Стримана класика»",
@@ -115,6 +123,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-single-cross",
+    published: true,
     categoryId: "cat-single",
     slug: "khrest-lakonichnyi",
     title: "Хрест «Лаконічний»",
@@ -132,6 +141,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-family-double",
+    published: true,
     categoryId: "cat-family",
     slug: "horyzontal-na-dvokh",
     title: "Горизонталь «На двох»",
@@ -149,6 +159,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-family-triple",
+    published: true,
     categoryId: "cat-family",
     slug: "rodynna-na-trokh",
     title: "Родинна «На трьох»",
@@ -166,6 +177,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-complex-complete",
+    published: true,
     categoryId: "cat-complex",
     slug: "kompleks-tsilisnyi",
     title: "Комплекс «Цілісний»",
@@ -183,6 +195,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-site-table-bench",
+    published: true,
     categoryId: "cat-site",
     slug: "stil-i-lavka",
     title: "Комплект «Стіл і лавка»",
@@ -200,6 +213,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-site-accessories",
+    published: true,
     categoryId: "cat-site",
     slug: "vazy-ta-lampadky",
     title: "Вази та лампадки",
@@ -217,6 +231,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-architecture-stairs",
+    published: true,
     categoryId: "cat-architecture",
     slug: "skhody-z-hranitu",
     title: "Сходи з граніту",
@@ -234,6 +249,7 @@ export const products: CatalogProduct[] = [
   },
   {
     id: "prod-architecture-interior",
+    published: true,
     categoryId: "cat-architecture",
     slug: "pidvikonnia-ta-stilnytsi",
     title: "Підвіконня та стільниці",
@@ -251,32 +267,39 @@ export const products: CatalogProduct[] = [
   },
 ];
 
+export const publishedCategories = categories.filter((category) => category.published);
+
+export const publishedProducts = products.filter(
+  (product) => product.published
+    && publishedCategories.some((category) => category.id === product.categoryId),
+);
+
 export const interestOptions = [
-  ...categories.map(({ formValue }) => formValue),
+  ...publishedCategories.map(({ formValue }) => formValue),
   "Інший виріб",
 ];
 
 export function getCategory(slug: string) {
-  return categories.find((category) => category.slug === slug);
+  return publishedCategories.find((category) => category.slug === slug);
 }
 
 export function getCategoryById(id: string) {
-  return categories.find((category) => category.id === id);
+  return publishedCategories.find((category) => category.id === id);
 }
 
 export function getProductsByCategory(categoryId: string) {
-  return products.filter((product) => product.categoryId === categoryId);
+  return publishedProducts.filter((product) => product.categoryId === categoryId);
 }
 
 export function getProduct(categoryId: string, productSlug: string) {
-  return products.find(
+  return publishedProducts.find(
     (product) => product.categoryId === categoryId && product.slug === productSlug,
   );
 }
 
 export function resolveProductSelection(productId: string, interest: string | null) {
-  const product = products.find(({ id }) => id === productId);
-  const category = product && categories.find(({ id }) => id === product.categoryId);
+  const product = publishedProducts.find(({ id }) => id === productId);
+  const category = product && publishedCategories.find(({ id }) => id === product.categoryId);
   if (!product || !category) return null;
   return {
     productId: product.id,

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { interestOptions, resolveProductSelection } from "../app/data/catalog.ts";
+import { categories, interestOptions, products, publishedCategories, publishedProducts, resolveProductSelection } from "../app/data/catalog.ts";
 
 test("resolves a product into a valid category option and a separate snapshot", () => {
   const selection = resolveProductSelection(
@@ -17,4 +17,12 @@ test("resolves a product into a valid category option and a separate snapshot", 
 
 test("rejects an unknown product instead of trusting the URL", () => {
   assert.equal(resolveProductSelection("prod-invented", "Вигаданий товар"), null);
+});
+
+test("exposes only explicitly published catalog records", () => {
+  assert.ok(categories.every((category) => typeof category.published === "boolean"));
+  assert.ok(products.every((product) => typeof product.published === "boolean"));
+  assert.deepEqual(publishedCategories, categories.filter((category) => category.published));
+  assert.ok(publishedProducts.every((product) => product.published));
+  assert.ok(publishedProducts.every((product) => publishedCategories.some((category) => category.id === product.categoryId)));
 });

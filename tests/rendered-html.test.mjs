@@ -13,7 +13,8 @@ test("renders the public contact foundation", async () => {
   assert.match(html, /\+380 66 057 09 87/);
   assert.match(html, /Kaminchyk-K-full-light\.png/);
   assert.match(html, /href="https:\/\/t\.me\/\+380660570987"/);
-  assert.match(html, /href="viber:\/\/chat\?number=%2B380660570987"/);
+  assert.doesNotMatch(html, /viber:\/\/chat\?number=/);
+  assert.match(html, /Скопіювати номер \+380 66 057 09 87 для Viber/);
   assert.match(html, /Швидкий зв’язок/);
   assert.match(html, /Тестовий режим: форма не надсилає й не зберігає персональні дані/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
@@ -96,4 +97,12 @@ test("locks the hero line breaks and uses responsive category focal points", asy
   assert.match(css, /object-position:\s*var\(--category-position/);
   assert.match(css, /object-position:\s*var\(--category-mobile-position/);
   assert.match(css, /min-height:\s*350px/);
+});
+
+test("keeps messenger controls consistent and balances the desktop footer", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(css, /\.messenger-links :is\(a, button\)/);
+  assert.match(css, /\.footer-actions\s*\{[^}]*justify-self:\s*start/);
+  assert.match(css, /grid-template-columns:\s*minmax\(210px, \.78fr\)/);
 });

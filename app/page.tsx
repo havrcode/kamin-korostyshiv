@@ -10,7 +10,7 @@ import { BrandLogo } from "./components/brand-logo";
 import { MessengerLinks } from "./components/messenger-links";
 import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
-import { categories, faqs, interestOptions, resolveProductSelection, stones } from "./data/catalog";
+import { faqs, interestOptions, publishedCategories, resolveProductSelection, stones } from "./data/catalog";
 import { siteConfig } from "./site-config";
 
 export default function Home() {
@@ -87,7 +87,7 @@ export default function Home() {
         body: JSON.stringify({
           name: data.get("name"),
           phone: data.get("phone"),
-          categoryId: categories.find(({ formValue }) => formValue === selectedInterest)?.id ?? null,
+          categoryId: publishedCategories.find(({ formValue }) => formValue === selectedInterest)?.id ?? null,
           productId: selectedProductId || null,
           categorySnapshot: selectedProductLabel || selectedInterest,
           message: data.get("message"),
@@ -183,7 +183,7 @@ export default function Home() {
       <section className="catalog-section" id="catalog">
         <div className="content-wrap section-heading" data-reveal><div><p className="eyebrow"><span></span>Основні категорії</p><h2>Знайдіть напрямок,<br />з якого <em>варто почати.</em></h2></div><p>Оберіть категорію, а майстер допоможе уточнити форму, матеріал, комплектацію та орієнтовний бюджет.</p></div>
         <div className="category-grid content-wrap">
-          {categories.map((category, index) => (
+          {publishedCategories.map((category, index) => (
             <a
               className={`category-card card-${index + 1}`}
               href={`/catalog/${category.slug}/`}
@@ -244,7 +244,7 @@ export default function Home() {
           </form>}
       </div></section>
 
-      <footer><div className="content-wrap footer-top"><a className="brand footer-brand" href="#top" aria-label={`${siteConfig.workingName} — на початок`}><BrandLogo /></a><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a><MessengerLinks className="footer-messengers" /><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a><a href="/privacy/">Конфіденційність</a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Демонстраційний каталог.</span><span>Україна · {siteConfig.location}</span></div></footer>
+      <footer><div className="content-wrap footer-top"><a className="brand footer-brand" href="#top" aria-label={`${siteConfig.workingName} — на початок`}><BrandLogo /></a><p>Вироби з натурального граніту та мармуру. Проєктування, виготовлення та встановлення.</p><div className="footer-actions"><a href={siteConfig.phone.href}><Icon name="phone" />{siteConfig.phone.display}</a><MessengerLinks className="footer-messengers" /><a href="#contact">Запросити прорахунок <Icon name="arrow" /></a><a href="/privacy/">Конфіденційність</a></div></div><div className="content-wrap footer-bottom"><span>© 2026 {siteConfig.workingName}. Демонстраційний каталог.</span><span>Україна · {siteConfig.location}</span></div></footer>
       <a className="floating-contact" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span>Зателефонувати</span></a>
     </main>
   );

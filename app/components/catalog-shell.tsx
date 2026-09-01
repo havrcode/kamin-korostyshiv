@@ -30,7 +30,7 @@ export function CatalogFooter() {
         <Link className="brand footer-brand" href="/" aria-label={`${siteConfig.workingName} — на головну`}><BrandLogo /></Link>
         <p>{siteConfig.description}</p>
         <div className="footer-actions">
-          <a href={siteConfig.phone.href}>{siteConfig.phone.display}<Icon name="phone" /></a>
+          <a href={siteConfig.phone.href}><Icon name="phone" />{siteConfig.phone.display}</a>
           <MessengerLinks className="footer-messengers" />
           <Link href="/#contact">Запросити прорахунок <Icon name="arrow" /></Link>
           <Link href="/privacy/">Конфіденційність</Link>

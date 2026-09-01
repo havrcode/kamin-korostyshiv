@@ -34,7 +34,10 @@ export const siteConfig = {
     },
     viber: {
       label: "Viber",
-      href: "viber://chat?number=%2B380660570987",
+      // Офіційний viber.me chat link працює лише для Viber Business.
+      // До його створення UI копіює номер без ненадійного personal deep link.
+      href: process.env.NEXT_PUBLIC_VIBER_CHAT_URL?.trim() || null,
+      copyNumber: "+380660570987",
     },
   },
   leads: {

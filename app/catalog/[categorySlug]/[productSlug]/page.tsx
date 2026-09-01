@@ -5,11 +5,11 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CatalogShell } from "../../../components/catalog-shell";
 import { Icon } from "../../../components/ui-icon";
-import { categories, getCategory, getProduct, products } from "../../../data/catalog";
+import { getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
 
 export function generateStaticParams() {
-  return products.flatMap((product) => {
-    const category = categories.find((item) => item.id === product.categoryId);
+  return publishedProducts.flatMap((product) => {
+    const category = publishedCategories.find((item) => item.id === product.categoryId);
     return category ? [{ categorySlug: category.slug, productSlug: product.slug }] : [];
   });
 }

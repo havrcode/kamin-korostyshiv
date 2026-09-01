@@ -74,10 +74,10 @@ body.motion-ready [data-reveal].is-visible { opacity: 1; transform: translateY(0
 .mobile-menu nav a small { color: rgba(255,255,255,.52); font: 11px var(--sans); letter-spacing: .05em; }
 .mobile-menu nav svg { color: var(--bronze-light); }
 .messenger-links { display: flex; align-items: center; gap: 8px; }
-.messenger-links a { min-height: 42px; padding: 0 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid currentColor; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.messenger-links :is(a, button) { min-height: 42px; padding: 0 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .messenger-links svg { width: 17px; height: 17px; }
 .mobile-menu-messengers { margin-top: 24px; }
-.mobile-menu-messengers a { flex: 1; color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.2); }
+.mobile-menu-messengers :is(a, button) { flex: 1; color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.2); }
 
 .hero { min-height: 790px; height: 94vh; max-height: 940px; position: relative; color: white; overflow: hidden; background: #202326; }
 .hero-image { position: absolute; inset: 0; background: url('/hero-memorial.webp') center/cover no-repeat; transform: scale(1.01); }
@@ -98,7 +98,7 @@ body.motion-ready [data-reveal].is-visible { opacity: 1; transform: translateY(0
 .hero-phone > span { display: flex; flex-direction: column; gap: 3px; }
 .hero-phone small { color: rgba(255,255,255,.58); font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .11em; }
 .hero-phone b { font-family: var(--serif); font-size: 17px; font-weight: 400; letter-spacing: .02em; white-space: nowrap; }
-.hero-messengers a { color: rgba(255,255,255,.82); border-color: rgba(255,255,255,.28); background: rgba(13,15,16,.25); backdrop-filter: blur(8px); }
+.hero-messengers :is(a, button) { color: rgba(255,255,255,.82); border-color: rgba(255,255,255,.28); background: rgba(13,15,16,.25); backdrop-filter: blur(8px); }
 .button { min-height: 54px; padding: 0 24px; display: inline-flex; align-items: center; justify-content: center; gap: 18px; border: 1px solid transparent; background: transparent; cursor: pointer; text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 700; transition: all .22s ease; }
 .button.primary { background: #f4f2ed; color: var(--ink); }
 .button.primary:hover { background: var(--bronze-light); }
@@ -222,14 +222,14 @@ h2 { margin: 0; font-size: clamp(42px, 5vw, 66px); line-height: 1.04; }
 .form-success button { margin-top: 20px; background: transparent; border: 0; padding: 0 0 5px; border-bottom: 1px solid var(--ink); cursor: pointer; }
 
 footer { background: #111315; color: #fff; padding: 55px 0 24px; }
-.footer-top { display: grid; grid-template-columns: .8fr 1fr .7fr; gap: 50px; align-items: center; padding-bottom: 50px; }
+.footer-top { display: grid; grid-template-columns: minmax(210px, .78fr) minmax(300px, 1fr) minmax(270px, .82fr); gap: clamp(42px, 6vw, 96px); align-items: center; padding-bottom: 50px; }
 .footer-top > p { color: rgba(255,255,255,.48); font-size: 12px; line-height: 1.6; max-width: 390px; }
-.footer-actions { justify-self: end; display: flex; flex-direction: column; align-items: flex-end; gap: 13px; }
-.footer-actions a { display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; }
+.footer-actions { justify-self: start; display: flex; flex-direction: column; align-items: flex-start; gap: 13px; }
+.footer-actions :is(a, button) { display: flex; align-items: center; gap: 12px; text-transform: uppercase; letter-spacing: .1em; font-size: 10px; }
 .footer-actions > a:first-child { font-family: var(--serif); font-size: 14px; letter-spacing: .04em; text-transform: none; }
 .footer-actions svg { width: 17px; height: 17px; }
 .footer-brand .brand-logo-image { width: 205px; }
-.footer-messengers a { min-height: 34px; padding: 0 9px; border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.68); font-size: 8px; }
+.footer-messengers :is(a, button) { min-height: 34px; padding: 0 9px; border-color: rgba(255,255,255,.18); color: rgba(255,255,255,.68); font-size: 8px; }
 .footer-bottom { padding-top: 22px; border-top: 1px solid rgba(255,255,255,.1); display: flex; justify-content: space-between; color: rgba(255,255,255,.35); font-size: 10px; }
 .floating-contact { position: fixed; z-index: 25; right: 24px; bottom: 24px; height: 50px; padding: 0 18px; display: flex; align-items: center; gap: 10px; background: var(--bronze); color: #fff; box-shadow: 0 14px 35px rgba(0,0,0,.24); font-size: 10px; text-transform: uppercase; letter-spacing: .1em; }
 .catalog-all { margin-top: 34px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
@@ -337,6 +337,9 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
 .admin-table th { color: var(--muted); text-transform: uppercase; letter-spacing: .09em; font-size: 9px; }
 .admin-table td a, .admin-table td small { display: block; margin-top: 5px; color: var(--muted); }
 .admin-table select { min-width: 130px; padding: 8px; border: 1px solid var(--line); background: #fff; }
+.admin-catalog-status { margin-top: 70px; padding-top: 48px; border-top: 1px solid var(--line); max-width: 860px; }
+.admin-catalog-status h2 { margin: 0; font-size: 38px; }
+.admin-catalog-status > p:last-child { color: var(--muted); line-height: 1.7; }
 
 /* На широкому екрані контакти є одним легким рядком, а не третім набором CTA. */
 @media (min-width: 721px) {
@@ -350,9 +353,9 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
   .hero-phone small { display: none; }
   .hero-phone b { font-size: 16px; }
   .hero-messengers { gap: 0; }
-  .hero-messengers a { min-height: 28px; padding-inline: 13px; border: 0; border-left: 1px solid rgba(255,255,255,.18); background: transparent; backdrop-filter: none; }
-  .hero-contact-bar a { transition: background-color .2s ease, color .2s ease; }
-  .hero-contact-bar a:hover, .hero-contact-bar a:focus-visible { background: rgba(255,255,255,.08); color: #fff; }
+  .hero-messengers :is(a, button) { min-height: 28px; padding-inline: 13px; border: 0; border-left: 1px solid rgba(255,255,255,.18); background: transparent; backdrop-filter: none; }
+  .hero-contact-bar :is(a, button) { transition: background-color .2s ease, color .2s ease; }
+  .hero-contact-bar :is(a, button):hover, .hero-contact-bar :is(a, button):focus-visible { background: rgba(255,255,255,.08); color: #fff; }
   .floating-contact { display: none; }
 }
 
@@ -397,8 +400,8 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
   .hero-phone { flex: 1; padding-inline: 13px; }
   .hero-phone b { font-size: 15px; }
   .hero-messengers { gap: 6px; }
-  .hero-messengers a { width: 45px; padding: 0; }
-  .hero-messengers a span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .hero-messengers :is(a, button) { width: 45px; padding: 0; }
+  .hero-messengers :is(a, button) span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .hero-facts { grid-template-columns: 1fr 1fr 1fr; width: 100%; }
   .hero-facts > div { min-height: 82px; padding: 13px 9px; flex-direction: column; gap: 8px; text-align: center; justify-content: center; }
   .hero-facts svg { width: 19px; height: 19px; }
