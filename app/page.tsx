@@ -158,7 +158,7 @@ export default function Home() {
         <div className="hero-image" role="img" aria-label="Сучасний меморіальний комплекс із граніту"></div><div className="hero-overlay"></div>
         <div className="hero-content content-wrap" data-reveal>
           <p className="eyebrow light"><span></span>Вироби з каменю · Коростишів</p>
-          <h1>Пам’ять у камені.<br /><em className="hero-craft">Майстерність</em> у деталях.</h1>
+          <h1>Пам’ять у камені.<br /><em className="hero-craft">Майстерність</em><br /><span className="hero-detail-line">у деталях.</span></h1>
           <p className="hero-lead">Пам’ятники, меморіальні комплекси та вироби з натурального граніту й мармуру — від вибору матеріалу та узгодження проєкту до встановлення.</p>
           <div className="hero-actions"><a className="button primary" href="#catalog">Переглянути каталог <Icon name="arrow" /></a><a className="button glass" href="#contact">Обговорити ваш проєкт</a></div>
           <div className="hero-contact-bar" aria-label="Швидкий зв’язок">
@@ -189,7 +189,11 @@ export default function Home() {
               href={`/catalog/${category.slug}/`}
               key={category.slug}
               data-reveal
-              style={{ "--reveal-delay": `${Math.min(index, 2) * 70}ms` } as CSSProperties}
+              style={{
+                "--reveal-delay": `${Math.min(index, 2) * 70}ms`,
+                "--category-position": category.imagePosition,
+                "--category-mobile-position": category.mobileImagePosition,
+              } as CSSProperties}
               aria-label={`${category.title}: відкрити категорію`}
             >
               <img src={category.image} alt="" /><span className="category-shade"></span><span className="category-tag">{category.tag}</span><span className="category-copy"><b>{category.title}</b><small>{category.text}</small></span><span className="round-arrow"><Icon name="arrow" /></span>

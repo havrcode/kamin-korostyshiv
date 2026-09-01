@@ -82,3 +82,18 @@ test("keeps the desktop contact strip compact without changing mobile controls",
   assert.match(mobileCss, /\.hero-contact-bar\s*\{\s*width:\s*min\(100%, 360px\)/);
   assert.match(mobileCss, /\.floating-contact\s*\{[^}]*width:\s*50px/);
 });
+
+test("locks the hero line breaks and uses responsive category focal points", async () => {
+  const html = await readFile(new URL("../out/index.html", import.meta.url), "utf8");
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+
+  assert.match(
+    html,
+    /Майстерність<\/em><br\/><span class="hero-detail-line">у деталях\.<\/span>/,
+  );
+  assert.match(html, /--category-position:48% 48%/);
+  assert.match(html, /--category-mobile-position:42% 50%/);
+  assert.match(css, /object-position:\s*var\(--category-position/);
+  assert.match(css, /object-position:\s*var\(--category-mobile-position/);
+  assert.match(css, /min-height:\s*350px/);
+});

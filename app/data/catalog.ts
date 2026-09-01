@@ -7,6 +7,8 @@ export type CatalogCategory = {
   formValue: string;
   text: string;
   image: string;
+  imagePosition: string;
+  mobileImagePosition: string;
   tag: string;
 };
 
@@ -43,6 +45,8 @@ export const categories: CatalogCategory[] = [
     formValue: "Одинарний пам’ятник",
     text: "Вертикальні стели, пам’ятники-хрести та індивідуальні форми",
     image: "/visual-single.webp",
+    imagePosition: "48% 48%",
+    mobileImagePosition: "48% 50%",
     tag: "1 портрет",
   },
   {
@@ -52,6 +56,8 @@ export const categories: CatalogCategory[] = [
     formValue: "Подвійний або родинний пам’ятник",
     text: "Горизонтальні композиції на двох і трьох із поєднанням каменю",
     image: "/visual-double.webp",
+    imagePosition: "50% 49%",
+    mobileImagePosition: "50% 50%",
     tag: "2–3 портрети",
   },
   {
@@ -61,6 +67,8 @@ export const categories: CatalogCategory[] = [
     formValue: "Меморіальний комплекс",
     text: "Цілісне проєктування стели, плит, бордюрів, декору й місця відпочинку",
     image: "/visual-complex.webp",
+    imagePosition: "48% 50%",
+    mobileImagePosition: "42% 50%",
     tag: "Під ділянку",
   },
   {
@@ -70,6 +78,8 @@ export const categories: CatalogCategory[] = [
     formValue: "Облаштування ділянки",
     text: "Столи, лавки, вази, лампадки, квітники, плити та бордюри",
     image: "/visual-table-bench.webp",
+    imagePosition: "52% 50%",
+    mobileImagePosition: "54% 50%",
     tag: "Комплектація",
   },
   {
@@ -79,6 +89,8 @@ export const categories: CatalogCategory[] = [
     formValue: "Архітектурний виріб із каменю",
     text: "Сходи, підвіконня, стільниці та інші вироби за точними розмірами",
     image: "/visual-stairs.webp",
+    imagePosition: "50% 50%",
+    mobileImagePosition: "50% 50%",
     tag: "Інтер’єр · фасад",
   },
 ];
