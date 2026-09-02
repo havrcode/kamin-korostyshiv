@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { categories, interestOptions, products, publishedCategories, publishedProducts, resolveProductSelection } from "../app/data/catalog.ts";
+import { categories, interestOptions, products, publishedCategories, publishedProducts, resolveProductSelection, resolveProductSelections } from "../app/data/catalog.ts";
 
 test("resolves a product into a valid category option and a separate snapshot", () => {
   const selection = resolveProductSelection(
@@ -17,6 +17,23 @@ test("resolves a product into a valid category option and a separate snapshot", 
 
 test("rejects an unknown product instead of trusting the URL", () => {
   assert.equal(resolveProductSelection("prod-invented", "Вигаданий товар"), null);
+});
+
+test("summarizes several selected products for one lead", () => {
+  const selection = resolveProductSelections([
+    "prod-table-2",
+    "prod-bench-2",
+    "prod-table-2",
+    "prod-invented",
+  ]);
+
+  assert.ok(selection);
+  assert.deepEqual(selection.productIds, ["prod-table-2", "prod-bench-2"]);
+  assert.equal(selection.primaryProductId, "prod-table-2");
+  assert.equal(selection.categoryValue, "Стіл або лавка з граніту");
+  assert.equal(selection.label, "Оформлення: 2 товари");
+  assert.match(selection.messageLine, /Столи та лавки: Стіл № 2/);
+  assert.match(selection.messageLine, /Столи та лавки: Лавка № 2/);
 });
 
 test("exposes only explicitly published catalog records", () => {

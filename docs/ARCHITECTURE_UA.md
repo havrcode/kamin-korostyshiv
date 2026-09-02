@@ -159,8 +159,7 @@ Telegram і Viber. `MessengerLinks` повторно використовуєт�
 | `menuOpen` | boolean | чи відкрите мобільне меню |
 | `activeStone` | number | індекс вибраного каменю |
 | `selectedInterest` | string | значення, яке має бути у select форми |
-| `selectedProductId` | string | стабільний ID товару з URL |
-| `selectedProductLabel` | string | людський snapshot товару для UI/заявки |
+| `selectedProductIds` | string[] | валідні ID товарів з URL або локального вибору |
 | `submitState` | union | idle/submitting/preview/success/error |
 | `publicNumber` | string | серверний номер збереженої заявки |
 
@@ -190,9 +189,12 @@ Cleanup важливий: без нього слухачі накопичува�
 6. `setSubmitted(false)` повертає форму, якщо раніше показувався результат.
 
 Категорійна картка веде на окрему сторінку. Товарний CTA повертає на головну з
-`interest` і `productId` у query; effect знаходить товар у локальному каталозі,
-підставляє валідний `category.formValue` у select та окремо зберігає людський
-snapshot. Невідомий `productId` не приймається лише через довірений URL.
+`interest`, `productId` або `productIds` у query; effect знаходить товари в
+локальному каталозі, підставляє валідний `category.formValue` у select і
+створює людський snapshot. Невідомі ID не приймаються лише через довірений URL.
+Кілька товарів зберігаються в `localStorage`, перший валідний ID іде в
+`product_id`, а повний список назв додається до `message`, щоб не міняти D1
+схему перед production-деплоєм.
 
 ### `submitForm(event)`
 
@@ -523,8 +525,9 @@ WebP-візуалізації: `Столи та лавки` — 14, `Лампа�
 canonical/OG із тих самих даних, тому заголовок і картка не розходяться.
 `sitemap.ts` також перебирає ці самі ID/slug.
 
-`ProductCard` не знає бізнес-логіки: отримує готовий `Product` і створює
-посилання. На detail page CTA додає `productId` і snapshot назви до query.
+`ProductCard` не знає приватної бізнес-логіки: отримує готовий `Product`,
+створює посилання, показує `+ / ✓` через `ProductInterestControl` і додає
+нижній action `Оформлення`. На detail page CTA додає `productIds` до query.
 Якщо фото пізніше замінюється, ID заявки не змінюється.
 
 ## 16. Turnstile і порядок приймання заявки

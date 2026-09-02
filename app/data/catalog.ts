@@ -40,6 +40,16 @@ export type StoneMaterial = {
   texturePosition: string;
 };
 
+export type ProductSelectionSummary = {
+  productIds: string[];
+  productLabels: string[];
+  primaryProductId: string;
+  categoryId: string | null;
+  categoryValue: string;
+  label: string;
+  messageLine: string;
+};
+
 type ProductInput = {
   id: string;
   published?: boolean;
@@ -64,13 +74,11 @@ type CategoryPresentation = {
 };
 
 const tableMaterials = ["Габро", "Габро Premium", "Покостівський граніт"] as const;
-const decorMaterials = ["Габро", "Габро Premium", "Покостівський граніт", "Метал за погодженням"] as const;
+const decorMaterials = ["Габро", "Габро Premium", "Покостівський граніт"] as const;
 const homeMaterials = ["Габро", "Габро Premium", "Покостівський граніт", "Мармур за погодженням"] as const;
 
 const tableOptions = ["Розмір під ділянку", "Полірована або матова поверхня", "Прямий чи заокруглений край", "Монтаж за домовленістю"] as const;
-const lampOptions = ["Колір металу", "Скло або відкрита форма", "Кріплення до плити", "Підбір під камінь"] as const;
-const vaseOptions = ["Форма чаші", "Висота та діаметр", "Колір каменю", "Полірування"] as const;
-const turnedOptions = ["Висота", "Діаметр", "Профіль точіння", "Кріплення"] as const;
+const simpleDecorOptions = ["Висота", "Вид каменю (уточнюємо)"] as const;
 const homeOptions = ["Точний замір", "Профіль краю", "Вирізи за шаблоном", "Доставка й монтаж"] as const;
 
 const presentationByCategory: Record<string, CategoryPresentation> = {
@@ -102,19 +110,19 @@ const presentationByCategory: Record<string, CategoryPresentation> = {
     image: "/visual-lamps.webp",
     imageAlt: "Візуалізація лампадки поруч із виробами з натурального каменю",
     materials: decorMaterials,
-    options: lampOptions,
+    options: simpleDecorOptions,
   },
   "cat-vases": {
     image: "/visual-vases.webp",
     imageAlt: "Візуалізація полірованої вази з натурального каменю",
     materials: decorMaterials,
-    options: vaseOptions,
+    options: simpleDecorOptions,
   },
   "cat-decor": {
     image: "/visual-decor.webp",
     imageAlt: "Візуалізація точеного кам’яного декору",
     materials: decorMaterials,
-    options: turnedOptions,
+    options: simpleDecorOptions,
   },
   "cat-home": {
     image: "/visual-home-interior-v2.webp",
@@ -697,6 +705,47 @@ export function resolveProductSelection(productId: string, interest: string | nu
     productId: product.id,
     categoryValue: category.formValue,
     label: (interest?.trim() || product.title).slice(0, 120),
+  };
+}
+
+function productCountLabel(count: number) {
+  const lastDigit = count % 10;
+  const lastTwoDigits = count % 100;
+  if (lastDigit === 1 && lastTwoDigits !== 11) return `${count} товар`;
+  if (lastDigit >= 2 && lastDigit <= 4 && (lastTwoDigits < 12 || lastTwoDigits > 14)) {
+    return `${count} товари`;
+  }
+  return `${count} товарів`;
+}
+
+export function resolveProductSelections(productIds: readonly string[]): ProductSelectionSummary | null {
+  const seen = new Set<string>();
+  const selected = productIds.flatMap((productId) => {
+    if (seen.has(productId)) return [];
+    seen.add(productId);
+    const product = publishedProducts.find((item) => item.id === productId);
+    const category = product && publishedCategories.find((item) => item.id === product.categoryId);
+    return product && category ? [{ product, category }] : [];
+  });
+
+  if (selected.length === 0) return null;
+
+  const categoryIds = new Set(selected.map(({ category }) => category.id));
+  const sharedCategory = categoryIds.size === 1 ? selected[0].category : null;
+  const label = selected.length === 1
+    ? selected[0].product.title
+    : `Оформлення: ${productCountLabel(selected.length)}`;
+  const productLabels = selected.map(({ category, product }) => `${category.title}: ${product.title}`);
+  const messageLine = `Обрані товари: ${productLabels.join("; ")}`;
+
+  return {
+    productIds: selected.map(({ product }) => product.id),
+    productLabels,
+    primaryProductId: selected[0].product.id,
+    categoryId: sharedCategory?.id ?? null,
+    categoryValue: sharedCategory?.formValue ?? "Інший виріб",
+    label,
+    messageLine,
   };
 }
 

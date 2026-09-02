@@ -8,20 +8,25 @@ import Script from "next/script";
 import Link from "next/link";
 import { BrandLogo } from "./components/brand-logo";
 import { MessengerLinks } from "./components/messenger-links";
+import {
+  normalizeProductIds,
+  readSelectedProductIds,
+  writeSelectedProductIds,
+} from "./components/product-selection-storage";
 import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
-import { faqs, interestOptions, publishedCategories, resolveProductSelection, stones } from "./data/catalog";
+import { faqs, interestOptions, publishedCategories, resolveProductSelection, resolveProductSelections, stones } from "./data/catalog";
 import { siteConfig } from "./site-config";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeStone, setActiveStone] = useState(0);
   const [selectedInterest, setSelectedInterest] = useState("");
-  const [selectedProductId, setSelectedProductId] = useState("");
-  const [selectedProductLabel, setSelectedProductLabel] = useState("");
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "preview" | "success" | "error">("idle");
   const [publicNumber, setPublicNumber] = useState("");
   const currentStone = useMemo(() => stones[activeStone], [activeStone]);
+  const selectedProducts = useMemo(() => resolveProductSelections(selectedProductIds), [selectedProductIds]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -44,16 +49,34 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const interest = params.get("interest");
+    const productIds = normalizeProductIds((params.get("productIds") ?? "").split(","));
     const productId = params.get("productId");
     const frame = window.requestAnimationFrame(() => {
-      const selection = productId && /^[a-z0-9][a-z0-9-]{1,79}$/.test(productId)
+      const queryProductIds = normalizeProductIds([
+        ...productIds,
+        ...(productId ? [productId] : []),
+      ]);
+      const storedProductIds = queryProductIds.length > 0 || !interest ? readSelectedProductIds() : [];
+      const combinedProductIds = normalizeProductIds([
+        ...storedProductIds,
+        ...queryProductIds,
+      ]);
+      const selection = resolveProductSelections(combinedProductIds);
+
+      if (selection) {
+        setSelectedProductIds(writeSelectedProductIds(selection.productIds));
+        setSelectedInterest(selection.categoryValue);
+        return;
+      }
+
+      const singleSelection = productId && /^[a-z0-9][a-z0-9-]{1,79}$/.test(productId)
         ? resolveProductSelection(productId, interest)
         : null;
-      if (selection) {
-        setSelectedInterest(selection.categoryValue);
-        setSelectedProductId(selection.productId);
-        setSelectedProductLabel(selection.label);
+      if (singleSelection) {
+        setSelectedProductIds(writeSelectedProductIds([singleSelection.productId]));
+        setSelectedInterest(singleSelection.categoryValue);
       } else if (interest && interestOptions.includes(interest)) {
+        setSelectedProductIds(writeSelectedProductIds([]));
         setSelectedInterest(interest);
       }
     });
@@ -62,9 +85,19 @@ export default function Home() {
 
   function chooseInterest(value: string) {
     setSelectedInterest(value);
-    setSelectedProductId("");
-    setSelectedProductLabel("");
+    setSelectedProductIds(writeSelectedProductIds([]));
     setSubmitState("idle");
+  }
+
+  function clearProductSelection() {
+    setSelectedProductIds(writeSelectedProductIds([]));
+    setSelectedInterest("");
+    setSubmitState("idle");
+    const url = new URL(window.location.href);
+    url.searchParams.delete("interest");
+    url.searchParams.delete("productId");
+    url.searchParams.delete("productIds");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
@@ -76,6 +109,9 @@ export default function Home() {
 
     const form = event.currentTarget;
     const data = new FormData(form);
+    const messageEntry = data.get("message");
+    const rawMessage = typeof messageEntry === "string" ? messageEntry.trim() : "";
+    const message = [selectedProducts?.messageLine, rawMessage].filter(Boolean).join("\n") || null;
     setSubmitState("submitting");
     try {
       const response = await fetch(siteConfig.leads.endpoint, {
@@ -87,10 +123,10 @@ export default function Home() {
         body: JSON.stringify({
           name: data.get("name"),
           phone: data.get("phone"),
-          categoryId: publishedCategories.find(({ formValue }) => formValue === selectedInterest)?.id ?? null,
-          productId: selectedProductId || null,
-          categorySnapshot: selectedProductLabel || selectedInterest,
-          message: data.get("message"),
+          categoryId: selectedProducts?.categoryId ?? publishedCategories.find(({ formValue }) => formValue === selectedInterest)?.id ?? null,
+          productId: selectedProducts?.primaryProductId ?? null,
+          categorySnapshot: selectedProducts?.label ?? selectedInterest,
+          message,
           consentAccepted: data.get("consentAccepted") === "on",
           website: data.get("website"),
           turnstileToken: data.get("cf-turnstile-response"),
@@ -100,6 +136,7 @@ export default function Home() {
       if (!response.ok || !payload.ok || !payload.lead?.publicNumber) throw new Error("lead_failed");
       setPublicNumber(payload.lead.publicNumber);
       setSubmitState("success");
+      setSelectedProductIds(writeSelectedProductIds([]));
       form.reset();
     } catch {
       setSubmitState("error");
@@ -243,7 +280,7 @@ export default function Home() {
         <div className="contact-copy"><p className="eyebrow light"><span></span>Почнімо з розмови</p><h2>Розкажіть, який виріб<br />ви хочете <em>створити.</em></h2><p>{siteConfig.leads.enabled ? "Залиште контакт і короткий опис. Заявка спочатку надійно збережеться, а потім майстер отримає сповіщення." : "Форма повністю підготовлена, але збір персональних даних у тестовій версії вимкнено до підключення власного Cloudflare та підтвердження правил зберігання. Найшвидший зв’язок зараз — телефон."}</p><a className="contact-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}><Icon name="phone" /><span><small>Телефон для консультації</small><b>{siteConfig.phone.display}</b></span></a><MessengerLinks className="contact-messengers" /><div className="contact-note"><Icon name="check" /><span><b>Без поспішних рішень</b><small>Спочатку обговорення, матеріал і проєкт — потім виробництво.</small></span></div></div>
         {(submitState === "preview" || submitState === "success") ? <div className="form-success" role="status"><span><Icon name="check" /></span><h3>{submitState === "success" ? `Заявку ${publicNumber} збережено` : "Чернетку заявки підготовлено"}</h3><p>{submitState === "success" ? "Майстер отримає сповіщення й зв’яжеться з вами. Збережіть номер заявки." : <>Дані нікуди не надсилалися: на публічному Sites збір персональних даних вимкнений. Зателефонуйте за номером <a href={siteConfig.phone.href}>{siteConfig.phone.display}</a>.</>}</p><button type="button" onClick={() => setSubmitState("idle")}>Повернутися до форми</button></div> :
           <form className="contact-form" onSubmit={submitForm} aria-describedby="form-preview-note">
-            {selectedInterest && <p className="selected-interest full"><Icon name="check" />Обрано: <b>{selectedProductLabel || selectedInterest}</b></p>}
+            {selectedProducts ? <div className="selected-products full"><div><Icon name="check" /><p>Обрано для оформлення: <b>{selectedProducts.label}</b></p><button type="button" onClick={clearProductSelection}>Очистити</button></div><ul>{selectedProducts.productLabels.map((label) => <li key={label}>{label}</li>)}</ul></div> : selectedInterest && <p className="selected-interest full"><Icon name="check" />Обрано: <b>{selectedInterest}</b></p>}
             <label><span>Ваше ім’я</span><input name="name" type="text" placeholder="Як до вас звертатися" autoComplete="name" minLength={2} maxLength={80} required /></label><label><span>Номер телефону</span><input name="phone" type="tel" placeholder="+38 (___) ___-__-__" autoComplete="tel" required /></label><label><span>Що вас цікавить?</span><select name="categoryId" value={selectedInterest} onChange={(event) => chooseInterest(event.target.value)} required><option value="" disabled>Оберіть категорію</option>{interestOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label><label className="full"><span>Коротко про побажання</span><textarea name="message" rows={3} maxLength={2000} placeholder="Матеріал, форма, орієнтовний бюджет або посилання на приклад"></textarea></label><label className="honeypot" aria-hidden="true"><span>Сайт</span><input name="website" tabIndex={-1} autoComplete="off" /></label>{siteConfig.leads.enabled && <><label className="consent full"><input name="consentAccepted" type="checkbox" required /><span>Погоджуюся на використання контактних даних лише для відповіді на звернення. <a href="/privacy/">Докладніше</a></span></label>{siteConfig.leads.turnstileSiteKey ? <div className="turnstile full"><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" /><div className="cf-turnstile" data-sitekey={siteConfig.leads.turnstileSiteKey} data-theme="light"></div></div> : <p className="form-error full">Форма вимкнена: не налаштований публічний ключ Turnstile.</p>}</>} {submitState === "error" && <p className="form-error full" role="alert">Не вдалося зберегти заявку. Дані не підтверджені як надіслані — будь ласка, зателефонуйте.</p>}<button className="button primary dark full" type="submit" disabled={submitState === "submitting" || (siteConfig.leads.enabled && !siteConfig.leads.turnstileSiteKey)}>{siteConfig.leads.enabled ? (submitState === "submitting" ? "Надсилаємо…" : "Надіслати заявку") : "Підготувати чернетку"} <Icon name="arrow" /></button><small className="form-policy" id="form-preview-note">{siteConfig.leads.enabled ? <>Надсилаючи форму, ви підтверджуєте згоду версії {siteConfig.leads.consentVersion}.</> : <>Тестовий режим: форма не надсилає й не зберігає персональні дані. <a href="/privacy/">Політика конфіденційності</a></>}</small>
           </form>}
       </div></section>

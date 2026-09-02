@@ -2,6 +2,7 @@
 
 import type { CatalogProduct } from "../data/catalog";
 import { getCategoryById } from "../data/catalog";
+import { ProductInterestControl } from "./product-interest-control";
 import { Icon } from "./ui-icon";
 
 export function ProductCard({ product }: { product: CatalogProduct }) {
@@ -10,10 +11,13 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
 
   return (
     <article className="product-card">
-      <a className="product-image" href={`/catalog/${category.slug}/${product.slug}/`}>
-        <img src={product.image} alt={product.imageAlt} width="1200" height="800" loading="lazy" />
-        {product.visualization && <span>Візуалізація</span>}
-      </a>
+      <div className="product-image-wrap">
+        <a className="product-image" href={`/catalog/${category.slug}/${product.slug}/`}>
+          <img src={product.image} alt={product.imageAlt} width="1200" height="800" loading="lazy" />
+          {product.visualization && <span>Візуалізація</span>}
+        </a>
+        <ProductInterestControl productId={product.id} productTitle={product.title} />
+      </div>
       <div className="product-card-copy">
         <p>{category.title}</p>
         <h2><a href={`/catalog/${category.slug}/${product.slug}/`}>{product.title}</a></h2>

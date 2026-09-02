@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CatalogShell } from "../../../components/catalog-shell";
+import { ProductInterestControl } from "../../../components/product-interest-control";
 import { Icon } from "../../../components/ui-icon";
 import { getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
 
@@ -39,14 +40,14 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
       <article className="product-detail content-wrap">
         <nav aria-label="Хлібні крихти"><Link href="/catalog/">Каталог</Link><span>→</span><Link href={`/catalog/${category.slug}/`}>{category.title}</Link><span>→</span><span>{product.title}</span></nav>
         <div className="product-detail-grid">
-          <figure><img src={product.image} alt={product.imageAlt} width="1200" height="800" />{product.visualization && <figcaption>Візуалізація концепції · не фотографія виконаної роботи</figcaption>}</figure>
+          <figure><img src={product.image} alt={product.imageAlt} width="1200" height="800" /><ProductInterestControl productId={product.id} productTitle={product.title} />{product.visualization && <figcaption>Візуалізація концепції · не фотографія виконаної роботи</figcaption>}</figure>
           <div className="product-detail-copy">
             <p className="eyebrow"><span></span>{category.title}</p>
             <h1>{product.title}</h1>
             <p className="product-summary">{product.summary}</p>
             <p>{product.description}</p>
             <div className="quote-label"><small>Режим ціни</small><b>{product.priceLabel}</b><span>Без вигаданих цифр до погодження матеріалів і розмірів</span></div>
-            <a className="button dark" href={`/?interest=${encodeURIComponent(interest)}&productId=${product.id}#contact`}>Мене цікавить цей виріб <Icon name="arrow" /></a>
+            <a className="button dark" href={`/?interest=${encodeURIComponent(interest)}&productIds=${product.id}#contact`}>Мене цікавить цей виріб <Icon name="arrow" /></a>
           </div>
         </div>
         <div className="product-specs">

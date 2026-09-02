@@ -117,7 +117,12 @@ test("renders the complete static catalog, products, privacy and admin shell", a
   assert.match(product, /Стіл з лавкою № 1/);
   assert.match(product, /\/products\/table-benches\/stil-z-lavkoiu-1\.webp/);
   assert.match(product, /prod-table-bench-1/);
+  assert.match(product, /productIds=prod-table-bench-1#contact/);
+  assert.match(product, /Оформлення/);
   assert.match(product, /Ручна перевірка/);
+  assert.match(tables, /aria-label="Додати до оформлення: Стіл № 2"/);
+  assert.match(tables, /productIds=prod-table-2#contact/);
+  assert.match(tables, /Оформлення/);
   assert.match(privacy, /На публічному Sites серверне надсилання форми вимкнене/);
   assert.match(admin, /Cloudflare Access/);
   assert.match(sitemap, /stil-z-lavkoiu-1/);
