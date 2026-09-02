@@ -5,7 +5,7 @@ import { siteConfig } from "./site-config";
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.publicUrl),
   title: "Kaminchyk — вироби з граніту та мармуру",
-  description: "Пам’ятники, меморіальні комплекси, столи, лавки, вази та лампадки з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
+  description: "Столи, лавки, вази, лампадки, підвіконня та стільниці з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {

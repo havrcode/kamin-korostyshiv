@@ -158,8 +158,8 @@ export default function Home() {
         <div className="hero-image" role="img" aria-label="Сучасний меморіальний комплекс із граніту"></div><div className="hero-overlay"></div>
         <div className="hero-content content-wrap" data-reveal>
           <p className="eyebrow light"><span></span>Вироби з каменю · Коростишів</p>
-          <h1>Пам’ять у камені.<br /><em className="hero-craft">Майстерність</em><br /><span className="hero-detail-line">у деталях.</span></h1>
-          <p className="hero-lead">Пам’ятники, меморіальні комплекси та вироби з натурального граніту й мармуру — від вибору матеріалу та узгодження проєкту до встановлення.</p>
+          <h1>Натуральний камінь.<br /><em className="hero-craft">Майстерність</em><br /><span className="hero-detail-line">у деталях.</span></h1>
+          <p className="hero-lead">Столи, лавки, вази, лампадки, підвіконня, стільниці та інші вироби з натурального граніту й мармуру — від вибору матеріалу до виготовлення та монтажу.</p>
           <div className="hero-actions"><a className="button primary" href="#catalog">Переглянути каталог <Icon name="arrow" /></a><a className="button glass" href="#contact">Обговорити ваш проєкт</a></div>
           <div className="hero-contact-bar" aria-label="Швидкий зв’язок">
             <a className="hero-phone" href={siteConfig.phone.href} aria-label={`Зателефонувати: ${siteConfig.phone.display}`}>
@@ -176,8 +176,8 @@ export default function Home() {
       </section>
 
       <section className="intro content-wrap" id="about" data-reveal>
-        <div><p className="eyebrow"><span></span>Про нашу роботу</p><h2>Не просто виріб.<br />Цілісне рішення <em>на роки.</em></h2></div>
-        <div className="intro-copy"><p>Ми створюємо вироби з натурального каменю з повагою до вашої історії та увагою до кожної деталі. Форма, пропорції, матеріали й оздоблення погоджуються до початку виробництва.</p><a className="text-link" href="#process">Дізнатися, як проходить замовлення <Icon name="arrow" /></a></div>
+        <div><p className="eyebrow"><span></span>Про нашу роботу</p><h2>Не просто деталь.<br />Цілісне рішення <em>на роки.</em></h2></div>
+        <div className="intro-copy"><p>Ми створюємо вироби з натурального каменю з увагою до форми, пропорцій, матеріалу й місця встановлення. Кожну деталь погоджуємо до початку виробництва.</p><a className="text-link" href="#process">Дізнатися, як проходить замовлення <Icon name="arrow" /></a></div>
       </section>
 
       <section className="catalog-section" id="catalog">
@@ -219,15 +219,19 @@ export default function Home() {
         <div className="stone-copy">
           <p className="eyebrow"><span></span>Природні матеріали</p><h2>Кожен камінь має<br />власний <em>характер.</em></h2><p>Колір на екрані може відрізнятися від реального. Для остаточного вибору матеріал краще побачити наживо та оцінити його малюнок після полірування.</p>
           <div className="stone-tabs" role="tablist" aria-label="Оберіть вид каменю">
-            {stones.map((stone, index) => <button key={stone.name} className={activeStone === index ? "active" : ""} onClick={() => setActiveStone(index)} role="tab" aria-selected={activeStone === index} type="button"><span style={{ backgroundColor: stone.color, boxShadow: `inset 0 0 0 2px ${stone.grain}` }}></span>{stone.name}</button>)}
+            {stones.map((stone, index) => (
+              <button key={stone.name} className={activeStone === index ? "active" : ""} onClick={() => setActiveStone(index)} role="tab" aria-selected={activeStone === index} type="button">
+                <span style={{ "--texture-position": stone.texturePosition, backgroundColor: stone.color, boxShadow: `inset 0 0 0 1px ${stone.grain}` } as CSSProperties}></span>{stone.name}
+              </button>
+            ))}
           </div>
-          <a className="text-link" href="#contact" onClick={() => chooseInterest("Камінь та оздоблення")}>Підібрати камінь для мого виробу <Icon name="arrow" /></a>
+          <a className="text-link" href="#contact" onClick={() => chooseInterest("Підбір каменю")}>Підібрати камінь для мого виробу <Icon name="arrow" /></a>
         </div>
-        <div className="stone-visual" style={{ "--stone": currentStone.color, "--grain": currentStone.grain } as CSSProperties}><div className="stone-slab"><span></span></div><div className="stone-label"><small>Обраний матеріал</small><b>{currentStone.name}</b><span>{currentStone.origin}</span></div></div>
+        <div className="stone-visual" style={{ "--stone": currentStone.color, "--grain": currentStone.grain, "--texture-position": currentStone.texturePosition } as CSSProperties}><div className="stone-slab"><span></span></div><div className="stone-label"><small>Обраний матеріал</small><b>{currentStone.name}</b><span>{currentStone.origin}</span></div></div>
       </section>
 
       <section className="service-band"><div className="content-wrap service-grid" data-reveal>
-        <div><Icon name="cube" /><b>Проєктування</b><p>Пропорції та комплектація під конкретну ділянку.</p></div><div><Icon name="spark" /><b>Художні роботи</b><p>Портрети, написи, символи та різьблений декор.</p></div><div><Icon name="shield" /><b>Контроль якості</b><p>Перевірка каменю, полірування та готового виробу.</p></div><div><Icon name="truck" /><b>Доставка і монтаж</b><p>Умови прораховуються індивідуально для замовлення.</p></div>
+        <div><Icon name="cube" /><b>Проєктування</b><p>Пропорції та комплектація під конкретне місце.</p></div><div><Icon name="spark" /><b>Деталі та декор</b><p>Вази, лампадки, профілі краю й точені елементи.</p></div><div><Icon name="shield" /><b>Контроль якості</b><p>Перевірка каменю, полірування та готового виробу.</p></div><div><Icon name="truck" /><b>Доставка і монтаж</b><p>Умови прораховуються індивідуально для замовлення.</p></div>
       </div></section>
 
       <section className="faq-section content-wrap" data-reveal>

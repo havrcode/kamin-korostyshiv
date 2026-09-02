@@ -7,7 +7,7 @@ import { siteConfig } from "../site-config";
 
 export const metadata: Metadata = {
   title: "Каталог виробів із граніту та мармуру — Kaminchyk",
-  description: "Демонстраційний каталог пам’ятників, меморіальних комплексів, облаштування ділянок, сходів, підвіконь і стільниць із натурального каменю.",
+  description: "Каталог столів, лавок, лампадок, ваз, кам’яного декору, підвіконь і стільниць із натурального каменю без вигаданих цін.",
   alternates: { canonical: "/catalog/" },
 };
 
@@ -16,9 +16,9 @@ export default function CatalogPage() {
     <CatalogShell>
       <section className="catalog-masthead content-wrap">
         <p className="eyebrow"><span></span>Каталог напрямків</p>
-        <h1>Від першої форми<br />до <em>цілісного проєкту.</em></h1>
-        <p>Оберіть готовий напрямок як основу. Розміри, камінь, оформлення, доставку й монтаж майстер уточнить перед кошторисом.</p>
-        <aside><b>Важливо</b><span>{siteConfig.catalogNotice} Усі ціни — тільки після погодженого прорахунку.</span></aside>
+        <h1>Вироби з каменю<br />без <em>вигаданих цін.</em></h1>
+        <p>Оберіть готовий напрямок як основу. Розміри, камінь, обробку, доставку й монтаж майстер уточнить перед кошторисом.</p>
+        <aside><b>Важливо</b><span>{siteConfig.catalogNotice} Для кожної позиції вартість уточнюється у продавця.</span></aside>
       </section>
 
       <nav className="catalog-category-nav content-wrap" aria-label="Категорії каталогу">
