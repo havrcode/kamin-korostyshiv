@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { BrandLogo } from "./brand-logo";
+import { CategoryVisualNav, type CategoryVisualNavProps } from "./category-visual-nav";
 import { MessengerLinks } from "./messenger-links";
 import { Icon } from "./ui-icon";
 import { siteConfig } from "../site-config";
@@ -41,6 +42,18 @@ export function CatalogFooter() {
   );
 }
 
-export function CatalogShell({ children }: { children: ReactNode }) {
-  return <main className="catalog-page"><CatalogHeader />{children}<CatalogFooter /></main>;
+type CatalogShellProps = {
+  categoryNav?: CategoryVisualNavProps;
+  children: ReactNode;
+};
+
+export function CatalogShell({ categoryNav, children }: CatalogShellProps) {
+  return (
+    <main className="catalog-page">
+      <CatalogHeader />
+      {categoryNav && <CategoryVisualNav {...categoryNav} />}
+      {children}
+      <CatalogFooter />
+    </main>
+  );
 }

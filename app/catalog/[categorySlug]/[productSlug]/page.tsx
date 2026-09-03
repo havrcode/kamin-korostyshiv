@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
   const interest = `${product.shortTitle} — ${product.title}`;
 
   return (
-    <CatalogShell>
+    <CatalogShell categoryNav={{ activeSlug: category.slug }}>
       <article className="product-detail content-wrap">
         <nav aria-label="Хлібні крихти"><Link href="/catalog/">Каталог</Link><span>→</span><Link href={`/catalog/${category.slug}/`}>{category.title}</Link><span>→</span><span>{product.title}</span></nav>
         <div className="product-detail-grid">

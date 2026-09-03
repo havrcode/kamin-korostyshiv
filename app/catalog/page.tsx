@@ -13,19 +13,13 @@ export const metadata: Metadata = {
 
 export default function CatalogPage() {
   return (
-    <CatalogShell>
+    <CatalogShell categoryNav={{ linkMode: "anchors" }}>
       <section className="catalog-masthead content-wrap">
         <p className="eyebrow"><span></span>Каталог напрямків</p>
         <h1>Вироби з каменю<br />без <em>вигаданих цін.</em></h1>
         <p>Оберіть готовий напрямок як основу. Розміри, камінь, обробку, доставку й монтаж майстер уточнить перед кошторисом.</p>
         <aside><b>Важливо</b><span>{siteConfig.catalogNotice} Для кожної позиції вартість уточнюється у продавця.</span></aside>
       </section>
-
-      <nav className="catalog-category-nav content-wrap" aria-label="Категорії каталогу">
-        {publishedCategories.map((category) => (
-          <a href={`#${category.slug}`} key={category.id}>{category.title}<span>{getProductsByCategory(category.id).length}</span></a>
-        ))}
-      </nav>
 
       {publishedCategories.map((category) => {
         const categoryProducts = getProductsByCategory(category.id);

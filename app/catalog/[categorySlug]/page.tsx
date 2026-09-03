@@ -28,7 +28,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
   const categoryProducts = getProductsByCategory(category.id);
 
   return (
-    <CatalogShell>
+    <CatalogShell categoryNav={{ activeSlug: category.slug }}>
       <section className="category-masthead content-wrap">
         <nav aria-label="Хлібні крихти"><Link href="/catalog/">Каталог</Link><span>→</span><span>{category.title}</span></nav>
         <p className="eyebrow"><span></span>{category.tag}</p>
