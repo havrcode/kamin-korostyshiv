@@ -51,7 +51,7 @@ export function AdminLeads() {
   }
 
   if (state === "loading") return <div className="admin-state">Завантажуємо заявки…</div>;
-  if (state === "unavailable") return <div className="admin-state"><b>Демонстраційний режим</b><p>Адмінський API тут не підключений. Після створення власного Cloudflare-акаунта, D1 і Access ця сама сторінка покаже реальні заявки.</p></div>;
+  if (state === "unavailable") return <div className="admin-state"><b>API заявок не підключений</b><p>Після підключення Cloudflare Worker, D1 і Access ця сторінка покаже реальні заявки.</p></div>;
   if (state === "error") return <div className="admin-state"><b>Дані не підтверджені</b><p>Сталася помилка. Адмінка не показує застарілий стан як успішний.</p><button type="button" onClick={() => void load()}>Спробувати ще раз</button></div>;
   if (leads.length === 0) return <div className="admin-state">Заявок поки немає.</div>;
 

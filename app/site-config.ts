@@ -41,7 +41,6 @@ export const siteConfig = {
     },
   },
   leads: {
-    enabled: process.env.NEXT_PUBLIC_LEADS_ENABLED === "true",
     endpoint: "/api/v1/leads",
     turnstileSiteKey: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "",
     consentVersion: "lead-contact-v1",

@@ -129,7 +129,7 @@ npx wrangler d1 migrations apply kamin-korostyshiv-production --remote --config 
 Sitekey є публічним. Його вказують під час production build:
 
 ```bash
-NEXT_PUBLIC_LEADS_ENABLED=true NEXT_PUBLIC_TURNSTILE_SITE_KEY="PASTE_SITEKEY" npm run build
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="PASTE_SITEKEY" npm run build
 ```
 
 Secret ніколи не додають у `.env`, який потрапляє в Git. Записати його у
@@ -205,7 +205,7 @@ npm test
 Зібрати frontend із production sitekey:
 
 ```bash
-NEXT_PUBLIC_LEADS_ENABLED=true NEXT_PUBLIC_TURNSTILE_SITE_KEY="PASTE_SITEKEY" npm run build
+NEXT_PUBLIC_TURNSTILE_SITE_KEY="PASTE_SITEKEY" npm run build
 ```
 
 Потім:

@@ -21,7 +21,10 @@ test("renders the public contact foundation", async () => {
   assert.doesNotMatch(html, /viber:\/\/chat\?number=/);
   assert.match(html, /Скопіювати номер \+380 66 057 09 87 для Viber/);
   assert.match(html, /Швидкий зв’язок/);
-  assert.match(html, /Тестовий режим: форма не надсилає й не зберігає персональні дані/);
+  assert.match(html, /Надіслати заявку/);
+  assert.match(html, /Форма тимчасово недоступна: не налаштований публічний ключ Turnstile/);
+  assert.match(html, /lead-contact-v1/);
+  assert.doesNotMatch(html, /Підготувати чернетку|Чернетку заявки|Тестовий режим/);
   assert.doesNotMatch(html, /заявку (?:успішно )?надіслано/i);
   assert.doesNotMatch(html, /challenges\.cloudflare\.com\/turnstile/);
 });
@@ -130,7 +133,7 @@ test("renders the complete static catalog, products, privacy and admin shell", a
   assert.match(tables, /href="\/catalog\/vazy\/"/);
   assert.match(tables, /productIds=prod-table-2#contact/);
   assert.match(tables, /Оформлення/);
-  assert.match(privacy, /На публічному Sites серверне надсилання форми вимкнене/);
+  assert.match(privacy, /Надсилання працює тільки після підключення Cloudflare Worker, D1, Turnstile і сповіщень/);
   assert.match(admin, /Cloudflare Access/);
   assert.match(sitemap, /stil-z-lavkoiu-1/);
   assert.match(sitemap, /stilnytsia-u-vannu/);

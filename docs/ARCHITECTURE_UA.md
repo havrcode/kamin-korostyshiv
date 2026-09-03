@@ -160,7 +160,7 @@ Telegram і Viber. `MessengerLinks` повторно використовуєт�
 | `activeStone` | number | індекс вибраного каменю |
 | `selectedInterest` | string | значення, яке має бути у select форми |
 | `selectedProductIds` | string[] | валідні ID товарів з URL або локального вибору |
-| `submitState` | union | idle/submitting/preview/success/error |
+| `submitState` | union | idle/submitting/success/error |
 | `publicNumber` | string | серверний номер збереженої заявки |
 
 `currentStone` створюється через `useMemo`. Він бере `stones[activeStone]` і
@@ -199,12 +199,10 @@ Cleanup важливий: без нього слухачі накопичува�
 ### `submitForm(event)`
 
 1. Браузер генерує submit-подію, `preventDefault()` не перезавантажує сторінку.
-2. Якщо `siteConfig.leads.enabled === false`, стан стає `preview`: жодного
-   мережевого запиту немає.
-3. У production функція збирає FormData, додає category/product ID,
+2. Функція збирає FormData, додає category/product ID,
    idempotency key і Turnstile token.
-4. `fetch('/api/v1/leads')` отримує success лише після D1 batch.
-5. UI показує `publicNumber`; будь-яка помилка переходить у `error`, а не
+3. `fetch('/api/v1/leads')` отримує success лише після D1 batch.
+4. UI показує `publicNumber`; будь-яка помилка переходить у `error`, а не
    імітує успішне надсилання.
 
 ## 5. `RevealObserver()`
@@ -584,9 +582,10 @@ price book не додається в Git: його створюють у при
 
 | Режим | Статика | Заявка | Адмінка | Дані |
 |---|---|---|---|---|
-| Sites demo | повний сайт і каталог | тільки локальний preview | demo-state | не збираються |
+| Sites/static preview | повний сайт і каталог | вимкнена без Turnstile/API | unavailable-state | не збираються |
 | Власний Cloudflare | ті самі assets | Turnstile → Worker → D1 | Access → API | D1 + secrets |
 
-Перемикач — build-time `NEXT_PUBLIC_LEADS_ENABLED`. Його не можна вмикати лише
-для «перевірки кнопки» без D1/Turnstile/політики: Worker правильно поверне 503.
+Публічна форма активується на build через `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, але
+це не замінює серверну готовність. Без D1, rate-limit binding, Turnstile secret
+і Telegram secrets Worker правильно поверне 503 або помилку перевірки.
 Покрокова активація описана в `docs/CLOUDFLARE_SETUP_UA.md`.
