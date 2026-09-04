@@ -4,6 +4,7 @@ import {
   type NotificationWorkerEnv,
 } from "../server/notifications/processor.ts";
 import { handleAdminApiRequest, type AdminWorkerEnv } from "../server/admin/leads.ts";
+import { handleAdminMediaRequest, handlePublicProductImagesRequest } from "../server/admin/media.ts";
 
 export type Env = LeadWorkerEnv & NotificationWorkerEnv & AdminWorkerEnv;
 
@@ -22,8 +23,12 @@ const worker = {
     context?: ExecutionContextLike,
   ): Promise<Response> {
     const url = new URL(request.url);
-    const response = url.pathname.startsWith("/api/v1/admin/")
-      ? await handleAdminApiRequest(request, env)
+    const response = url.pathname === "/api/v1/catalog/product-images"
+      ? await handlePublicProductImagesRequest(request, env)
+      : url.pathname.startsWith("/api/v1/admin/product-images")
+      ? await handleAdminMediaRequest(request, env)
+      : url.pathname.startsWith("/api/v1/admin/")
+        ? await handleAdminApiRequest(request, env)
       : await handleLeadApiRequest(request, env);
     if (shouldProcessOutbox(url.pathname, response.status) && context) {
       context.waitUntil(processNotificationOutbox(env, { limit: 1 }));

@@ -1,6 +1,6 @@
 # Kaminchyk
 
-Версія `1.1.10` — сайт виробів із граніту та
+Версія `1.1.11` — сайт виробів із граніту та
 мармуру. Frontend створено на React + TypeScript/Next.js і збирається як
 статичний сайт. Окремий Cloudflare Worker містить перевірений контур заявок,
 Telegram-outbox, захищеної адмінки та приватного кошторису.
@@ -27,6 +27,8 @@ Telegram-outbox, захищеної адмінки та приватного к�
 - `POST /api/v1/leads`: D1, idempotency, rate limit, Turnstile й outbox;
 - Telegram retry/Cron із захистом від конкурентної доставки;
 - `/admin`: Cloudflare Access JWT, email allowlist, список заявок і audit log;
+- production photo API: до 5 фото на товар, private/public R2, Images binding,
+  D1 metadata, публікація, приховування і soft-delete;
 - серверний калькулятор, який відокремлює собівартість від клієнтського JSON;
 - production-приклад Wrangler та дві докладні інструкції Cloudflare/домену.
 
@@ -61,7 +63,7 @@ npm test
 ```
 
 `npm test` виконує production build 51 статичного маршруту, 7 smoke-тестів
-HTML, 37 unit-тестів (включно з реальною прозорістю брендових PNG) й суху
+HTML, 39 unit-тестів (включно з реальною прозорістю брендових PNG) й суху
 Wrangler-збірку Worker.
 
 ## Економний режим Codex

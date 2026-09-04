@@ -698,6 +698,10 @@ export function getProduct(categoryId: string, productSlug: string) {
   );
 }
 
+export function isPublishedProductId(productId: string) {
+  return publishedProducts.some((product) => product.id === productId);
+}
+
 export function resolveProductSelection(productId: string, interest: string | null) {
   const product = publishedProducts.find(({ id }) => id === productId);
   const category = product && publishedCategories.find(({ id }) => id === product.categoryId);

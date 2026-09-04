@@ -123,7 +123,7 @@ function main() {
   }
 
   const targetRatio = parseRatio(options.ratio);
-  const targetWidth = Math.round(parsePositiveNumber(options.width, "--width"));
+  const targetWidth = Math.min(4096, Math.round(parsePositiveNumber(options.width, "--width")));
   const quality = parsePositiveNumber(options.quality, "--quality");
   if (quality > 100) {
     throw new Error("--quality must be between 1 and 100");

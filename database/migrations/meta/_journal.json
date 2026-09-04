@@ -22,6 +22,13 @@
       "when": 1788258037009,
       "tag": "0002_cute_ironclad",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788522717913,
+      "tag": "0003_magical_warpath",
+      "breakpoints": true
     }
   ]
 }

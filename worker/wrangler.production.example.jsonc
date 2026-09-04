@@ -17,6 +17,19 @@
       "migrations_dir": "../database/migrations"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "PRODUCT_MEDIA_PRIVATE",
+      "bucket_name": "kaminchyk-product-originals"
+    },
+    {
+      "binding": "PRODUCT_MEDIA_PUBLIC",
+      "bucket_name": "kaminchyk-product-public"
+    }
+  ],
+  "images": {
+    "binding": "IMAGES"
+  },
   "ratelimits": [
     {
       "name": "LEAD_RATE_LIMITER",
@@ -28,6 +41,7 @@
   "vars": {
     "CF_ACCESS_TEAM_DOMAIN": "YOUR_TEAM.cloudflareaccess.com",
     "CF_ACCESS_AUD": "PASTE_ACCESS_APPLICATION_AUD_HERE",
-    "ADMIN_EMAILS": "owner@example.com"
+    "ADMIN_EMAILS": "owner@example.com",
+    "MEDIA_PUBLIC_BASE_URL": "https://media.example.com"
   }
 }

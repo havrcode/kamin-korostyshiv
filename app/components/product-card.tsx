@@ -1,8 +1,7 @@
-/* eslint-disable @next/next/no-img-element -- WebP-файли вже оптимізовані для статичного export. */
-
 import type { CatalogProduct } from "../data/catalog";
 import { getCategoryById } from "../data/catalog";
 import { ProductInterestControl } from "./product-interest-control";
+import { CatalogProductImage } from "./catalog-product-image";
 import { Icon } from "./ui-icon";
 
 export function ProductCard({ product }: { product: CatalogProduct }) {
@@ -13,7 +12,7 @@ export function ProductCard({ product }: { product: CatalogProduct }) {
     <article className="product-card">
       <div className="product-image-wrap">
         <a className="product-image" href={`/catalog/${category.slug}/${product.slug}/`}>
-          <img src={product.image} alt={product.imageAlt} width="1200" height="800" loading="lazy" />
+          <CatalogProductImage productId={product.id} fallback={product.image} alt={product.imageAlt} width={1200} height={800} />
           {product.visualization && <span>Візуалізація</span>}
         </a>
         <ProductInterestControl productId={product.id} productTitle={product.title} />

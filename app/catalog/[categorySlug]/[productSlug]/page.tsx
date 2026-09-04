@@ -1,10 +1,9 @@
-/* eslint-disable @next/next/no-img-element -- Оптимізований WebP потрібен статичному export. */
-
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CatalogShell } from "../../../components/catalog-shell";
 import { ProductInterestControl } from "../../../components/product-interest-control";
+import { CatalogProductImage } from "../../../components/catalog-product-image";
 import { Icon } from "../../../components/ui-icon";
 import { getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
 
@@ -40,7 +39,7 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
       <article className="product-detail content-wrap">
         <nav aria-label="Хлібні крихти"><Link href="/catalog/">Каталог</Link><span>→</span><Link href={`/catalog/${category.slug}/`}>{category.title}</Link><span>→</span><span>{product.title}</span></nav>
         <div className="product-detail-grid">
-          <figure><img src={product.image} alt={product.imageAlt} width="1200" height="800" /><ProductInterestControl productId={product.id} productTitle={product.title} />{product.visualization && <figcaption>Візуалізація концепції</figcaption>}</figure>
+          <figure><CatalogProductImage productId={product.id} fallback={product.image} alt={product.imageAlt} width={1200} height={800} loading="eager" /><ProductInterestControl productId={product.id} productTitle={product.title} />{product.visualization && <figcaption>Візуалізація концепції</figcaption>}</figure>
           <div className="product-detail-copy">
             <p className="eyebrow"><span></span>{category.title}</p>
             <h1>{product.title}</h1>

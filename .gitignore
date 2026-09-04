@@ -41,6 +41,8 @@ next-env.d.ts
 /.wrangler/
 /.worker-dist/
 /worker/.worker-dist/
+/.worker-dist-production/
+/worker/.worker-dist-production/
 /worker/wrangler.production.jsonc
 /.codegraph/
 /.sites-runtime/

@@ -83,8 +83,10 @@ database/
     0000...sql               заявки й outbox
     0001...sql               product_id
     0002...sql               admin_audit_log
+    0003...sql               product_images, R2 metadata і soft-delete
 server/
   admin/                     Access JWT і захищений admin API
+    media.ts                 R2 upload, Images WebP і product image API
   estimates/                 internal/client calculator
   leads/
     http.ts                  HTTP-межа, розмір, rate limit і відповіді
@@ -391,7 +393,7 @@ outbox → Telegram → адмінка.
 індекс `status + next_attempt_at + locked_at` підготовлений для атомарного
 захоплення доступної пачки подій воркером. Стан `FAILED` не видаляє заявку.
 
-Файли `database/migrations/0000...0002.sql` утворюють послідовну незмінну
+Файли `database/migrations/0000...0003.sql` утворюють послідовну незмінну
 історію: базові заявки/outbox → `product_id` → audit log. Застосовану міграцію
 не редагують; наступна зміна схеми створює новий файл.
 
@@ -517,7 +519,7 @@ HTML, але всі поля заявки спочатку екрануютьс�
 materials/options і режим ціни. Поточний локальний кандидат має 5 публічних
 категорій і 38 публічних товарів; пам’ятникові категорії лишаються в даних із
 `published: false`. Усі публічні товари мають `priceMode: "quote"` та
-`requiresManualReview: true`; усі публічні категорії вже мають окремі товарні
+`requiresManualReview: false` за замовчуванням; усі публічні категорії вже мають окремі товарні
 WebP-візуалізації: `Столи та лавки` — 14, `Лампадки` — 7, `Вази` — 6,
 `Інший декор` — 2, `Камінь для дому` — 9.
 

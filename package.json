@@ -1,6 +1,6 @@
 {
   "name": "kamin-korostyshiv",
-  "version": "1.1.10",
+  "version": "1.1.11",
   "private": true,
   "engines": {
     "node": ">=22.18.0"
@@ -12,7 +12,7 @@
     "build": "next build",
     "test": "npm run build && node --test tests/rendered-html.test.mjs && npm run test:unit && npm run worker:check",
     "test:unit": "node --test tests/*.test.ts",
-    "lint": "eslint . --ignore-pattern out --ignore-pattern dist --ignore-pattern .next --ignore-pattern .sites-runtime",
+    "lint": "eslint . --ignore-pattern out --ignore-pattern dist --ignore-pattern .next --ignore-pattern .sites-runtime --ignore-pattern .worker-dist --ignore-pattern .worker-dist-production --ignore-pattern worker/.worker-dist --ignore-pattern worker/.worker-dist-production",
     "typecheck": "tsc --noEmit",
     "worker:check": "wrangler deploy --dry-run --config worker/wrangler.jsonc --outdir .worker-dist",
     "db:generate": "drizzle-kit generate"

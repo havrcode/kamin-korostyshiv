@@ -22,9 +22,10 @@
 ## Поточна база
 
 - GitHub: `havrcode/kamin-korostyshiv`.
-- Актуальна перевірена база: `v1.1.9`; поточний кандидат: `v1.1.10` (workflow
-  Sites і фото).
-- Локальний кандидат після поточної роботи: немає.
+- Актуальна перевірена версія: `v1.1.11` (production media API і responsive
+  nav).
+- Локальний кандидат після поточної роботи: немає; цей стан готовий до push у
+  GitHub і подальшого production setup власника.
 - Стек: React + TypeScript + Next.js App Router.
 - Публічний frontend збирається як static export у `out/`.
 - Vinext/Vite не повертати.
@@ -116,6 +117,10 @@ git log --oneline --decorate -10
   окремого прохання власника.
 - Поточний архів зображень:
   `work/archives/kaminchyk-image-assets-2026-09-02.zip`.
+
+- Production photo API підготовлений у Worker: `product_images` у D1, два R2
+  buckets, Images binding, Access/JWT, максимум 5 активних фото, WebP fallback
+  і soft-delete. Потрібно лише створити ресурси та заповнити production config.
 
 ## Найближчий крок
 

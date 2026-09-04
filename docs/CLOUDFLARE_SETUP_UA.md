@@ -116,7 +116,36 @@ npx wrangler d1 migrations apply kamin-korostyshiv-production --remote --config 
 Після застосування Cloudflare робить точку відновлення. Перелік команд D1:
 <https://developers.cloudflare.com/d1/wrangler-commands/>.
 
-## 6. Створити Turnstile
+## 6. Підключити production-фото
+
+Створити два R2 bucket-и: окремий приватний для оригіналів і окремий публічний
+для WebP. Це не дає випадковому відвідувачу отримати оригінальний файл через
+той самий public media hostname.
+
+```bash
+npx wrangler r2 bucket create kaminchyk-product-originals
+npx wrangler r2 bucket create kaminchyk-product-public
+```
+
+1. У `worker/wrangler.production.example.jsonc` уже підготовлені bindings
+   `PRODUCT_MEDIA_PRIVATE`, `PRODUCT_MEDIA_PUBLIC` та `IMAGES`.
+2. Скопіювати example у `worker/wrangler.production.jsonc` і залишити назви
+   bucket-ів без змін або замінити їх на власні.
+3. Для `kaminchyk-product-public` підключити власний custom domain, наприклад
+   `media.kaminchyk.com.ua`. Не вмикати public `r2.dev` для production.
+4. Вписати цей URL у `MEDIA_PUBLIC_BASE_URL`. Приватному bucket-у оригіналів
+   custom domain не підключати.
+5. Міграція `0003_magical_warpath.sql` вже входить у команду з §5. Якщо D1
+   було створено до версії `v1.1.11`, повторити цю команду один раз після
+   оновлення файлів проєкту.
+
+Worker Images binding приймає raw bytes, обрізає у `3:2` без зайвого upscale і
+кодує WebP quality 86. Потрібно, щоб у Cloudflare Images були доступні
+Transformations; на Free-плані є місячний ліміт унікальних перетворень.
+Офіційні довідки: <https://developers.cloudflare.com/images/optimization/binding/>
+та <https://developers.cloudflare.com/images/optimization/features/>.
+
+## 7. Створити Turnstile
 
 1. У dashboard відкрити `Turnstile`.
 2. Натиснути `Add widget`.
@@ -144,7 +173,7 @@ npx wrangler secret put TURNSTILE_SECRET_KEY --config worker/wrangler.production
 Cloudflare вимагає серверну перевірку токена; у коді вона вже реалізована:
 <https://developers.cloudflare.com/turnstile/get-started/server-side-validation/>.
 
-## 7. Підключити Telegram
+## 8. Підключити Telegram
 
 Потрібні реальні `bot token` і `chat ID`. До їх отримання заявка все одно може
 зберігатися в D1, але Telegram-процесор відмовиться claim-ити чергу.
@@ -159,7 +188,7 @@ npx wrangler secret put TELEGRAM_CHAT_ID --config worker/wrangler.production.jso
 Не вставляти значення token у командний рядок після назви. Wrangler сам
 запросить приховане введення.
 
-## 8. Захистити `/admin`
+## 9. Захистити `/admin`
 
 Адмінка використовує Cloudflare Access і додатково сама перевіряє:
 
@@ -191,7 +220,7 @@ Cloudflare Access працює як identity-aware proxy до запуску Wor
 ввімкнути одноразовий PIN на дозволену пошту:
 <https://developers.cloudflare.com/cloudflare-one/integrations/identity-providers/one-time-pin/>.
 
-## 9. Розгорнути
+## 10. Розгорнути
 
 Перед кожним production deployment:
 
@@ -218,7 +247,7 @@ npx wrangler deploy --config worker/wrangler.production.jsonc
 `Custom domain` і вибрати production-домен. Офіційна інструкція:
 <https://developers.cloudflare.com/workers/configuration/routing/custom-domains/>.
 
-## 10. Контроль після запуску
+## 11. Контроль після запуску
 
 Перевірити по черзі:
 
@@ -233,7 +262,7 @@ npx wrangler deploy --config worker/wrangler.production.jsonc
 9. `robots.txt` і `sitemap.xml` відкриваються;
 10. у репозиторії немає secrets.
 
-## 11. Відновлення D1
+## 12. Відновлення D1
 
 Free plan зберігає 7 днів Time Travel. Перед реальною помилкою нічого не
 відновлювати «для перевірки» на production. Спочатку подивитися інформацію:
@@ -251,7 +280,7 @@ npx wrangler d1 time-travel restore kamin-korostyshiv-production
 Wrangler попросить точку часу. Офіційна довідка:
 <https://developers.cloudflare.com/d1/reference/time-travel/>.
 
-## 12. Що ще має підтвердити бізнес
+## 13. Що ще має підтвердити бізнес
 
 Форма не повинна збирати реальні дані до погодження:
 

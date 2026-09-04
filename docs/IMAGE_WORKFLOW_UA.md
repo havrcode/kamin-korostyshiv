@@ -49,7 +49,7 @@ node scripts/prepare-product-image.mjs \
 оригінальний PNG/JPG/HEIC треба зберігати окремо в `work/` або пізніше в R2.
 WebP можна перегенерувати будь-коли з того самого оригіналу.
 
-## Майбутня адмінка фото
+## Production-адмінка фото
 
 Окремий сервіс або піддомен зараз не потрібні. Рішення для першого production:
 залишити `/admin` у цьому проєкті, а pipeline зробити повторно використовуваним
@@ -61,18 +61,28 @@ WebP можна перегенерувати будь-коли з того са�
 відновити, видалити та змінити порядок фото, але ліміт п’яти повинен перевіряти
 Worker, а не тільки інтерфейс.
 
-Production-потік:
+Цей потік уже реалізований у `server/admin/media.ts` і
+`app/admin/admin-product-images.tsx`:
 
 1. Адмін завантажує PNG/JPG/HEIC через захищений `/admin`.
 2. Worker перевіряє Access/JWT, MIME, сигнатуру файлу, розмір, dimensions і
    кількість активних фото.
-3. Оригінал зберігається в приватному R2, а WebP-варіанти генеруються для
-   `card` і `detail`.
+3. Оригінал зберігається в приватному R2, а один WebP-кадр у спільній геометрії
+   `3:2` використовується для `card` і `detail`.
 4. D1 зберігає `product_id`, object keys, порядок, published, dimensions,
    checksum, автора, timestamps і soft-delete.
 5. Публічний frontend читає тільки опубліковані варіанти.
 
-Для першого production локальна підготовка WebP є дешевшою й передбачуванішою.
-Автоматичну серверну конвертацію краще підключати після появи реальних фото:
-через Cloudflare Images/Transformations або окремий image worker, а не тягнути
-важкий Node image stack у звичайний Worker.
+Endpoints:
+
+- `POST /api/v1/admin/product-images` — multipart upload і WebP generation;
+- `GET /api/v1/admin/product-images?productId=...` — список для адмінки;
+- `PATCH` / `DELETE /api/v1/admin/product-images/:id` — видимість, порядок,
+  alt і soft-delete;
+- `GET /api/v1/catalog/product-images` — опубліковані URL для статичного
+  frontend після hydration.
+
+Для production серверна конвертація виконується через Cloudflare Images binding,
+а WebP зберігається у публічному R2. Локальний CLI залишається дешевим
+fallback-процесом для підготовки фото до завантаження й для роботи без мережі;
+важкий Node image stack у Worker не потрібен.

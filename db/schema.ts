@@ -80,3 +80,31 @@ export const adminAuditLog = sqliteTable(
     index("admin_audit_actor_idx").on(table.actorEmail, table.createdAt),
   ],
 );
+
+export const productImages = sqliteTable(
+  "product_images",
+  {
+    id: text("id").primaryKey(),
+    productId: text("product_id").notNull(),
+    originalKey: text("original_key").notNull(),
+    webpKey: text("webp_key").notNull(),
+    publicUrl: text("public_url").notNull(),
+    alt: text("alt"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    published: integer("published").notNull().default(0),
+    width: integer("width").notNull(),
+    height: integer("height").notNull(),
+    originalMime: text("original_mime").notNull(),
+    originalBytes: integer("original_bytes").notNull(),
+    checksumSha256: text("checksum_sha256"),
+    createdBy: text("created_by").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+  },
+  (table) => [
+    uniqueIndex("product_images_webp_key_unique").on(table.webpKey),
+    index("product_images_product_order_idx").on(table.productId, table.sortOrder),
+    index("product_images_product_published_idx").on(table.productId, table.published, table.deletedAt),
+  ],
+);

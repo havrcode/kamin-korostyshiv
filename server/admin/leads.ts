@@ -1,8 +1,9 @@
 import type { D1DatabaseLike } from "../leads/repository.ts";
 import { verifyAdminAccess, type AdminAuthEnv } from "./auth.ts";
 import type { TurnstileFetchLike } from "../security/turnstile.ts";
+import type { AdminMediaWorkerEnv } from "./media.ts";
 
-export interface AdminWorkerEnv extends AdminAuthEnv {
+export interface AdminWorkerEnv extends AdminAuthEnv, Pick<AdminMediaWorkerEnv, "PRODUCT_MEDIA_PRIVATE" | "PRODUCT_MEDIA_PUBLIC" | "IMAGES" | "MEDIA_PUBLIC_BASE_URL"> {
   DB?: D1DatabaseLike;
 }
 

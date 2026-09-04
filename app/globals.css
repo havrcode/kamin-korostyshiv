@@ -352,6 +352,29 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
 .admin-state b { color: var(--ink); font: 24px var(--serif); }
 .admin-state p { line-height: 1.6; }
 .admin-state button { border: 0; border-bottom: 1px solid currentColor; background: transparent; padding: 4px 0; cursor: pointer; }
+.admin-media { margin-top: 72px; padding-top: 48px; border-top: 1px solid var(--line); }
+.admin-media-heading { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 40px; align-items: end; }
+.admin-media-heading h2 { margin: 0; font-size: 38px; }
+.admin-media-heading p:not(.eyebrow) { max-width: 760px; color: var(--muted); line-height: 1.6; }
+.admin-media-heading label, .admin-media-form label { display: grid; gap: 8px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.admin-media select, .admin-media input[type="number"], .admin-media input[type="file"] { width: 100%; min-height: 42px; padding: 9px 10px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-size: 12px; text-transform: none; letter-spacing: 0; }
+.admin-media-form { margin-top: 30px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) 180px auto auto; gap: 18px; align-items: end; background: #e8e4dc; }
+.admin-media-file input { padding: 7px; }
+.admin-media-form small { color: var(--muted); font-size: 10px; line-height: 1.4; text-transform: none; letter-spacing: 0; }
+.admin-media-check { display: flex !important; grid-template-columns: none !important; align-items: center; gap: 8px !important; white-space: nowrap; }
+.admin-media-check input { width: 17px; height: 17px; margin: 0; }
+.admin-media-form .button { min-height: 42px; padding-inline: 16px; white-space: nowrap; }
+.admin-media-feedback { margin: 18px 0 0; color: var(--muted); font-size: 12px; }
+.admin-media-grid { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.admin-media-card { overflow: hidden; border: 1px solid rgba(22,25,28,.1); background: #fff; }
+.admin-media-card > img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; background: #d6d5d0; }
+.admin-media-card > div { padding: 14px; display: grid; gap: 7px; }
+.admin-media-card small { color: var(--muted); font-size: 10px; }
+.admin-media-card strong { font: 18px var(--serif); font-weight: 400; }
+.admin-media-actions { display: flex; gap: 14px; }
+.admin-media-actions button { padding: 3px 0; border: 0; border-bottom: 1px solid currentColor; background: transparent; color: var(--ink); cursor: pointer; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.admin-media-replace { position: relative; padding: 3px 0; border-bottom: 1px solid currentColor; color: var(--ink); cursor: pointer; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
+.admin-media-replace input { position: absolute; inset: 0; width: 100% !important; min-height: 100% !important; padding: 0 !important; border: 0 !important; opacity: 0; cursor: pointer; }
 .admin-table-wrap { margin-top: 45px; overflow-x: auto; background: #fff; }
 .admin-table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 12px; }
 .admin-table th, .admin-table td { padding: 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
@@ -397,6 +420,18 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
   .catalog-header nav { display: none; }
   .catalog-category-nav { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
+  .admin-media-heading { grid-template-columns: 1fr; gap: 24px; }
+  .admin-media-form { grid-template-columns: 1fr 1fr; }
+}
+
+/* У landscape на планшеті/телефоні всі категорії мають лишатися в одному рядку. */
+@media (min-width: 721px) and (max-width: 1000px) {
+  .catalog-category-nav { grid-template-columns: repeat(5, minmax(0, 1fr)); padding-block: 4px; }
+  .catalog-category-nav a { min-height: 54px; padding: 5px 6px; grid-template-columns: 38px minmax(0, 1fr); gap: 6px; }
+  .catalog-category-nav img { width: 38px; height: 34px; }
+  .catalog-category-nav span { gap: 3px; }
+  .catalog-category-nav b { font-size: 10px; }
+  .catalog-category-nav small { font-size: 8px; letter-spacing: .05em; }
 }
 
 @media (max-width: 720px) {
@@ -488,6 +523,8 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
   .product-detail h1 { font-size: 38px; }
   .product-specs { grid-template-columns: 1fr; }
   .product-specs section, .product-specs section:first-child { border: 0; border-bottom: 1px solid var(--line); }
+  .admin-media-form { grid-template-columns: 1fr; }
+  .admin-media-grid { grid-template-columns: 1fr; }
   .legal-page { padding-block: 70px 90px; }
 }
 
