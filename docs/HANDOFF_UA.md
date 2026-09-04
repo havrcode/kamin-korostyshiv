@@ -331,4 +331,26 @@ image generation і Sites-публікації не запускати для д
 - `docs/BRAND_ASSETS_UA.md` — активний знак, резерви, прозорість і правила використання.
 - `docs/CONSTRUCTOR_2D_3D_PLAN_UA.md` — повна специфікація конструктора.
 - `docs/BRIEF_UA.md` — короткий стартовий контекст для малих задач.
+- `docs/SITES_PUBLISH_UA.md` — точний сценарій підготовки й публікації Sites.
+- `docs/IMAGE_WORKFLOW_UA.md` — підготовка фото та майбутня адмінка зображень.
 - `CHANGELOG.md` — історія змін, помітна за версіями.
+
+## 17. Публікація Sites і локальний image pipeline
+
+Перевірений сценарій останньої успішної публікації збережено в
+`docs/SITES_PUBLISH_UA.md`. Скрипт `scripts/prepare-sites-release.sh` повторює
+його безпечну частину: тимчасовий клон внутрішнього Sites Git, `HTTP/1.1`,
+`postBuffer=500 MB`, `maxRequestBuffer=100 MB`, виключення локальних каталогів,
+перевірка однакового Git tree, fast-forward push і package archive. Save/deploy
+виконуються через Sites connector, бо credential і deployment API не повинні
+потрапляти в репозиторій.
+
+Окремий `scripts/prepare-product-image.mjs` готує фото з телефона у WebP.
+Канонічний кадр сайту — `3:2`, рекомендована ширина — до 1536 px, quality —
+86. Оригінал не перезаписується.
+
+Для майбутньої адмінки рекомендовано максимум п’ять активних фото на товар,
+R2 для оригіналів і WebP, D1 для порядку/видимості/soft-delete та server-side
+ліміт. Окремий піддомен або універсальний SaaS поки не створювати: спочатку
+довести pipeline на Kaminchyk, потім за потреби винести нейтральний CLI у
+приватний пакет.

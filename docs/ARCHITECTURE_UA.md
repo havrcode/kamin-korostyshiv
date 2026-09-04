@@ -99,6 +99,9 @@ tests/
 worker/
   index.ts                   Cloudflare Worker entrypoint тільки для API
   wrangler.jsonc             базова конфігурація сухої збірки
+scripts/
+  prepare-product-image.mjs  локальний crop/resize WebP pipeline
+  prepare-sites-release.sh   перевірена синхронізація source tree Sites
 public/
   brand/kaminchyk/           12 затверджених прозорих PNG і checksums
   brand/archive/             попередня емблема та favicon

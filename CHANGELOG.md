@@ -7,6 +7,18 @@
 
 - Немає.
 
+## 1.1.10 — 4 вересня 2026 року
+
+- Збережено робочий сценарій публікації ChatGPT Sites у
+  `docs/SITES_PUBLISH_UA.md`.
+- Додано `scripts/prepare-sites-release.sh`: тимчасовий source clone Sites,
+  збільшені HTTP buffers, перевірка Git tree, fast-forward push і package
+  archive без збереження токена.
+- Додано `scripts/prepare-product-image.mjs` для crop, resize і конвертації
+  PNG/JPG/HEIC у WebP без зміни оригіналу.
+- Задокументовано формат зйомки та майбутню адмінку фото через R2/D1 з лімітом
+  до п’яти активних фото на товар.
+
 ## 1.1.9 — 4 вересня 2026 року
 
 - На сторінці окремого товару залишено коротку позначку `Візуалізація

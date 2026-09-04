@@ -1,6 +1,6 @@
 # Kaminchyk
 
-Версія `1.1.7` — сайт виробів із граніту та
+Версія `1.1.10` — сайт виробів із граніту та
 мармуру. Frontend створено на React + TypeScript/Next.js і збирається як
 статичний сайт. Окремий Cloudflare Worker містить перевірений контур заявок,
 Telegram-outbox, захищеної адмінки та приватного кошторису.
@@ -103,11 +103,17 @@ worker/API, маршрутизації чи shared CSS.
 - `public/products/home/` — дев’ять товарних WebP-візуалізацій для категорії
   `Камінь для дому`;
 - `public/stone-texture-atlas.webp` — optimized atlas зразків каменю.
+- `scripts/prepare-sites-release.sh` — синхронізація source tree з Sites із
+  перевіркою tree і збільшеним HTTP buffer.
+- `scripts/prepare-product-image.mjs` — crop, resize і WebP для фото з
+  телефона.
 
 ## Документація
 
 - [Поточний стан](docs/PROJECT_STATUS_UA.md)
 - [Короткий робочий контекст](docs/BRIEF_UA.md)
+- [Публікація на ChatGPT Sites](docs/SITES_PUBLISH_UA.md)
+- [Робота з фото товарів](docs/IMAGE_WORKFLOW_UA.md)
 - [План розробки](docs/PROJECT_PLAN_UA.md)
 - [Повний контекст і передача](docs/HANDOFF_UA.md)
 - [Архітектура та виклики](docs/ARCHITECTURE_UA.md)
