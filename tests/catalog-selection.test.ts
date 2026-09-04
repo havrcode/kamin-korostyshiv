@@ -41,6 +41,7 @@ test("exposes only explicitly published catalog records", () => {
   assert.ok(products.every((product) => typeof product.published === "boolean"));
   assert.deepEqual(publishedCategories, categories.filter((category) => category.published));
   assert.ok(publishedProducts.every((product) => product.published));
+  assert.ok(publishedProducts.every((product) => product.requiresManualReview === false));
   assert.ok(publishedProducts.every((product) => publishedCategories.some((category) => category.id === product.categoryId)));
   assert.equal(publishedCategories.length, 5);
   assert.equal(publishedProducts.length, 38);

@@ -317,12 +317,12 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
 .product-detail { padding-block: 55px 110px; }
 .product-detail > nav { margin-bottom: 34px; }
 .product-detail-grid { display: grid; grid-template-columns: 1.12fr .88fr; gap: 7vw; align-items: center; }
-.product-detail figure { margin: 0; position: relative; }
-.product-detail figure img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.product-detail figure { margin: 0; position: relative; overflow: hidden; }
+.product-detail figure img { display: block; width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
 .product-detail figcaption { position: absolute; left: 16px; top: 16px; max-width: calc(100% - 90px); padding: 8px 11px; color: #fff; background: rgba(17,19,21,.8); backdrop-filter: blur(5px); font-size: 9px; text-transform: uppercase; letter-spacing: .09em; }
 .product-detail figure .product-interest-toggle { top: 16px; right: 16px; }
 .product-detail figure .product-order-link { right: 16px; bottom: 16px; }
-.product-detail h1 { font-size: clamp(45px, 5.2vw, 70px); }
+.product-detail h1 { font-size: clamp(38px, 4.4vw, 60px); }
 .product-detail-copy > p:not(.eyebrow) { color: var(--muted); line-height: 1.7; }
 .product-detail-copy .product-summary { color: var(--ink) !important; font: 20px/1.45 var(--serif); }
 .quote-label { margin: 27px 0; padding: 18px 20px; display: grid; gap: 5px; background: #e8e4dc; }
@@ -482,8 +482,10 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
   .manual-review { align-items: flex-start; flex-direction: column; gap: 24px; }
   .product-detail { padding-block: 38px 80px; }
   .product-detail-grid { align-items: start; }
-  .product-detail figcaption { position: static; display: block; color: var(--muted); background: transparent; padding: 9px 0; }
-  .product-detail h1 { font-size: 46px; }
+  .product-detail figcaption { left: 12px; top: 12px; max-width: calc(100% - 72px); padding: 7px 9px; font-size: 8px; }
+  .product-detail figure .product-interest-toggle { top: 12px; right: 12px; }
+  .product-detail figure .product-order-link { right: 12px; bottom: 12px; max-width: calc(100% - 24px); padding: 9px 10px; font-size: 8px; }
+  .product-detail h1 { font-size: 38px; }
   .product-specs { grid-template-columns: 1fr; }
   .product-specs section, .product-specs section:first-child { border: 0; border-bottom: 1px solid var(--line); }
   .legal-page { padding-block: 70px 90px; }

@@ -53,6 +53,7 @@ export type ProductSelectionSummary = {
 type ProductInput = {
   id: string;
   published?: boolean;
+  requiresManualReview?: boolean;
   categoryId: string;
   slug: string;
   title: string;
@@ -656,7 +657,7 @@ function quoteProduct(input: ProductInput): CatalogProduct {
     options: input.options ?? presentation.options,
     priceMode: "quote",
     priceLabel: input.priceLabel ?? "Вартість уточнюється",
-    requiresManualReview: true,
+    requiresManualReview: input.requiresManualReview ?? false,
     visualization: true,
   };
 }
