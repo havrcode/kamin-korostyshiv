@@ -22,8 +22,8 @@
 ## Поточна база
 
 - GitHub: `havrcode/kamin-korostyshiv`.
-- Актуальна перевірена версія: `v1.1.11` (production media API і responsive
-  nav).
+- Актуальна перевірена версія: `v1.1.12` (production media API, responsive
+  nav і розподілене підсвічування CTA).
 - Локальний кандидат після поточної роботи: немає; цей стан готовий до push у
   GitHub і подальшого production setup власника.
 - Стек: React + TypeScript + Next.js App Router.

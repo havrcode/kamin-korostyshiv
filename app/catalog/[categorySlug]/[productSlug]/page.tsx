@@ -5,7 +5,7 @@ import { CatalogShell } from "../../../components/catalog-shell";
 import { ProductInterestControl } from "../../../components/product-interest-control";
 import { CatalogProductImage } from "../../../components/catalog-product-image";
 import { Icon } from "../../../components/ui-icon";
-import { getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
+import { deliveryOptions, getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
 
 export function generateStaticParams() {
   return publishedProducts.flatMap((product) => {
@@ -52,6 +52,7 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
         <div className="product-specs">
           <section><h2>Можливі матеріали</h2><ul>{product.materials.map((item) => <li key={item}><Icon name="check" />{item}</li>)}</ul></section>
           <section><h2>Що можна змінити</h2><ul>{product.options.map((item) => <li key={item}><Icon name="check" />{item}</li>)}</ul></section>
+          <section><h2>Доставка</h2><ul>{deliveryOptions.map((item) => <li key={item}><Icon name="check" />{item}</li>)}</ul></section>
           {product.requiresManualReview && <section className="review-card"><h2>Ручна перевірка</h2><p>Майстер окремо підтверджує розміри, товщини, сумісність деталей, художнє оформлення, доступ до ділянки, доставку й монтаж.</p></section>}
         </div>
       </article>
