@@ -4,6 +4,20 @@
  * Коли узгодимо остаточну назву, адресу або номер, їх треба змінити тут,
  * а не шукати однаковий текст у всіх компонентах.
  */
+const fallbackPublicUrl = "https://kamin-korostyshiv.dev-mr-serg.chatgpt.site";
+
+function resolvePublicUrl(value: string | undefined) {
+  if (!value?.trim()) return fallbackPublicUrl;
+
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== "https:" && url.protocol !== "http:") return fallbackPublicUrl;
+    return url.toString().replace(/\/+$/, "");
+  } catch {
+    return fallbackPublicUrl;
+  }
+}
+
 export const siteConfig = {
   workingName: "Kaminchyk",
   brand: {
@@ -18,9 +32,9 @@ export const siteConfig = {
     },
   },
   location: "Коростишів, Житомирська область",
-  publicUrl: "https://kamin-korostyshiv.dev-mr-serg.chatgpt.site",
+  publicUrl: resolvePublicUrl(process.env.NEXT_PUBLIC_SITE_URL),
   description:
-    "Столи, лавки, вази, лампадки, підвіконня, стільниці та інші вироби з натурального каменю. Проєктування, виготовлення, доставка й монтаж.",
+    "Гранітні та мармурові вироби з натурального каменю в Коростишеві: столи й лавки, кам’яні вази, лампадки, підвіконня, стільниці, полиці та декор. Проєктування, виготовлення, доставка й монтаж.",
   catalogNotice:
     "Зображення з позначкою «Візуалізація» є концептами, а не фотографіями виконаних робіт.",
   phone: {

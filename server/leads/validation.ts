@@ -102,7 +102,7 @@ export function validateLeadInput(input: unknown): LeadValidationResult {
     errors.push({
       field: "consentAccepted",
       code: "CONSENT_REQUIRED",
-      message: "Потрібна згода на обробку даних для відповіді на звернення.",
+      message: "Потрібна згода на використання контактних даних.",
     });
   }
   if (!turnstileToken || turnstileToken.length < 10 || turnstileToken.length > 2048) {

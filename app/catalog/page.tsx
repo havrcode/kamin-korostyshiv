@@ -2,18 +2,46 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CatalogShell } from "../components/catalog-shell";
 import { ProductCard } from "../components/product-card";
+import { StructuredData } from "../components/structured-data";
 import { getProductsByCategory, publishedCategories } from "../data/catalog";
 import { siteConfig } from "../site-config";
 
 export const metadata: Metadata = {
   title: "Каталог виробів із граніту та мармуру — Kaminchyk",
-  description: "Каталог столів, лавок, лампадок, ваз, кам’яного декору, підвіконь і стільниць із натурального каменю без вигаданих цін.",
+  description: siteConfig.description,
   alternates: { canonical: "/catalog/" },
+  openGraph: {
+    title: "Каталог виробів із граніту та мармуру — Kaminchyk",
+    description: siteConfig.description,
+    url: "/catalog/",
+  },
 };
 
 export default function CatalogPage() {
+  const siteUrl = siteConfig.publicUrl;
+  const catalogStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${siteUrl}/catalog/#page`,
+    url: new URL("/catalog/", siteUrl).toString(),
+    name: metadata.title,
+    description: siteConfig.description,
+    isPartOf: { "@id": `${siteUrl}/#website` },
+    mainEntity: {
+      "@type": "ItemList",
+      numberOfItems: publishedCategories.length,
+      itemListElement: publishedCategories.map((category, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: category.title,
+        url: new URL(`/catalog/${category.slug}/`, siteUrl).toString(),
+      })),
+    },
+  };
+
   return (
     <CatalogShell categoryNav={{ linkMode: "anchors" }}>
+      <StructuredData data={catalogStructuredData} />
       <section className="catalog-masthead content-wrap">
         <p className="eyebrow"><span></span>Каталог напрямків</p>
         <h1>Вироби з каменю<br />без <em>вигаданих цін.</em></h1>

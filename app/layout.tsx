@@ -1,23 +1,24 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { StructuredData } from "./components/structured-data";
 import { siteConfig } from "./site-config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.publicUrl),
   title: "Kaminchyk — вироби з граніту та мармуру",
-  description: "Столи, лавки, вази, лампадки, підвіконня та стільниці з натурального граніту й мармуру. Проєктування, виготовлення та встановлення.",
+  description: siteConfig.description,
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
   openGraph: {
     title: "Kaminchyk",
-    description: "Вироби з граніту та мармуру — від ідеї до встановлення.",
+    description: siteConfig.description,
     type: "website",
     images: [{ url: "/og-kaminchyk.jpg", width: 1200, height: 630, alt: "Kaminchyk — вироби з граніту та мармуру" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Kaminchyk",
-    description: "Вироби з граніту та мармуру — від ідеї до встановлення.",
+    description: siteConfig.description,
     images: ["/og-kaminchyk.jpg"],
   },
   icons: {
@@ -28,5 +29,37 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="uk"><body>{children}</body></html>;
+  const siteUrl = siteConfig.publicUrl;
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": `${siteUrl}/#organization`,
+        name: siteConfig.brand.name,
+        url: siteUrl,
+        logo: new URL(siteConfig.brand.logo.emblemDark, siteUrl).toString(),
+        description: siteConfig.description,
+        areaServed: siteConfig.location,
+        contactPoint: {
+          "@type": "ContactPoint",
+          telephone: siteConfig.phone.display,
+          contactType: "customer service",
+          availableLanguage: "uk",
+        },
+        sameAs: [siteConfig.messengers.telegram.href],
+      },
+      {
+        "@type": "WebSite",
+        "@id": `${siteUrl}/#website`,
+        url: siteUrl,
+        name: siteConfig.brand.name,
+        description: siteConfig.description,
+        publisher: { "@id": `${siteUrl}/#organization` },
+        inLanguage: "uk-UA",
+      },
+    ],
+  };
+
+  return <html lang="uk"><body><StructuredData data={siteJsonLd} />{children}</body></html>;
 }

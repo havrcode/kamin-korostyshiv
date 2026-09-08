@@ -7,6 +7,9 @@ test("renders the public contact foundation", async () => {
 
   assert.match(html, /<html lang="uk">/);
   assert.match(html, /<title>Kaminchyk/);
+  assert.match(html, /application\/ld\+json/);
+  assert.match(html, /"@type":"Organization"/);
+  assert.match(html, /"@type":"WebSite"/);
   assert.match(html, /https:\/\/kamin-korostyshiv\.dev-mr-serg\.chatgpt\.site\/og-kaminchyk\.jpg/);
   assert.doesNotMatch(html, /localhost:3000/);
   assert.match(html, /href="tel:\+380660570987"/);
@@ -51,6 +54,8 @@ test("renders the complete static catalog, products, privacy and admin shell", a
   assert.match(catalog, /catalog-category-nav/);
   assert.match(catalog, /href="#stoly-ta-lavky"/);
   assert.match(catalog, /Камінь для дому/);
+  assert.match(catalog, /"@type":"CollectionPage"/);
+  assert.match(catalog, /"@type":"ItemList"/);
   assert.match(catalog, /Вартість уточнюється/);
   assert.match(catalog, /Столи та лавки/);
   assert.match(catalog, /Лампадка № 6/);
@@ -128,6 +133,9 @@ test("renders the complete static catalog, products, privacy and admin shell", a
   assert.match(product, /productIds=prod-table-bench-1#contact/);
   assert.match(product, /Оформлення/);
   assert.match(product, /Візуалізація концепції/);
+  assert.match(product, /"@type":"Product"/);
+  assert.match(product, /"sku":"prod-table-bench-1"/);
+  assert.match(product, /"@type":"BreadcrumbList"/);
   assert.doesNotMatch(product, /не фотографія виконаної роботи/);
   assert.doesNotMatch(product, /Ручна перевірка/);
   assert.match(tables, /aria-label="Додати до оформлення: Стіл № 2"/);
@@ -140,6 +148,8 @@ test("renders the complete static catalog, products, privacy and admin shell", a
   assert.match(sitemap, /stil-z-lavkoiu-1/);
   assert.match(sitemap, /stilnytsia-u-vannu/);
   assert.match(sitemap, /kamianyi-fartukh/);
+  assert.match(sitemap, /xmlns:image="http:\/\/www\.google\.com\/schemas\/sitemap-image\/1\.1"/);
+  assert.match(sitemap, /<image:loc>https:\/\/kamin-korostyshiv\.dev-mr-serg\.chatgpt\.site\/products\/table-benches\/stil-z-lavkoiu-1\.webp<\/image:loc>/);
   assert.doesNotMatch(sitemap, /odynarni-pamiatnyky|rodynni-pamiatnyky|memorialni-kompleksy/);
 });
 
