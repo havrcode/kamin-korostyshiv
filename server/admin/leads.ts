@@ -2,9 +2,15 @@ import type { D1DatabaseLike } from "../leads/repository.ts";
 import { verifyAdminAccess, type AdminAuthEnv } from "./auth.ts";
 import type { TurnstileFetchLike } from "../security/turnstile.ts";
 import type { AdminMediaWorkerEnv } from "./media.ts";
+import {
+  contentDispositionName,
+  type LeadAttachmentBucketLike,
+  type StoredLeadAttachmentRow,
+} from "../leads/attachments.ts";
 
 export interface AdminWorkerEnv extends AdminAuthEnv, Pick<AdminMediaWorkerEnv, "PRODUCT_MEDIA_PRIVATE" | "PRODUCT_MEDIA_PUBLIC" | "IMAGES" | "MEDIA_PUBLIC_BASE_URL"> {
   DB?: D1DatabaseLike;
+  LEAD_ATTACHMENTS?: LeadAttachmentBucketLike;
 }
 
 export interface AdminHandlerOptions {
@@ -12,6 +18,24 @@ export interface AdminHandlerOptions {
 }
 
 const LEAD_STATUSES = new Set(["NEW", "IN_PROGRESS", "CONTACTED", "CLOSED", "SPAM"]);
+
+type AdminLeadRow = {
+  id: string;
+  public_number: string;
+  name: string;
+  phone_normalized: string;
+  category_id: string | null;
+  product_id: string | null;
+  category_snapshot: string;
+  message: string | null;
+  status: string;
+  created_at: number;
+  updated_at: number;
+};
+
+type AdminLeadAttachment = Pick<StoredLeadAttachmentRow, "id" | "original_name" | "mime" | "bytes" | "created_at"> & {
+  download_url: string;
+};
 
 function json(body: unknown, status: number): Response {
   return Response.json(body, {
@@ -50,8 +74,59 @@ export async function handleAdminApiRequest(
     const query = status && LEAD_STATUSES.has(status)
       ? statement.bind(status, boundedLimit(url.searchParams.get("limit")))
       : statement.bind(boundedLimit(url.searchParams.get("limit")));
-    const rows = await query.all();
-    return json({ ok: true, leads: rows.results }, 200);
+    const rows = await query.all<AdminLeadRow>();
+    const attachmentsByLead = new Map<string, AdminLeadAttachment[]>();
+    if (rows.results.length > 0) {
+      const placeholders = rows.results.map(() => "?").join(", ");
+      const attachments = await env.DB.prepare(
+        `SELECT id, lead_id, storage_key, original_name, mime, bytes, created_at
+         FROM lead_attachments
+         WHERE lead_id IN (${placeholders})
+         ORDER BY created_at ASC`,
+      ).bind(...rows.results.map((row) => row.id)).all<StoredLeadAttachmentRow>();
+      for (const attachment of attachments.results) {
+        const list = attachmentsByLead.get(attachment.lead_id) ?? [];
+        list.push({
+          id: attachment.id,
+          original_name: attachment.original_name,
+          mime: attachment.mime,
+          bytes: attachment.bytes,
+          created_at: attachment.created_at,
+          download_url: `/api/v1/admin/leads/${attachment.lead_id}/attachments/${attachment.id}`,
+        });
+        attachmentsByLead.set(attachment.lead_id, list);
+      }
+    }
+    return json({
+      ok: true,
+      leads: rows.results.map((row) => ({ ...row, attachments: attachmentsByLead.get(row.id) ?? [] })),
+    }, 200);
+  }
+
+  const attachmentMatch = url.pathname.match(/^\/api\/v1\/admin\/leads\/([0-9a-f-]{16,64})\/attachments\/([0-9a-f-]{16,64})$/i);
+  if (attachmentMatch && request.method === "GET") {
+    if (!env.LEAD_ATTACHMENTS) return json({ ok: false, error: { code: "ATTACHMENTS_NOT_CONFIGURED" } }, 503);
+    const attachment = await env.DB.prepare(
+      `SELECT id, lead_id, storage_key, original_name, mime, bytes, created_at
+       FROM lead_attachments
+       WHERE id = ? AND lead_id = ?
+       LIMIT 1`,
+    ).bind(attachmentMatch[2], attachmentMatch[1]).first<StoredLeadAttachmentRow>();
+    if (!attachment) return json({ ok: false, error: { code: "ATTACHMENT_NOT_FOUND" } }, 404);
+    const stored = await env.LEAD_ATTACHMENTS.get(attachment.storage_key);
+    if (!stored?.body) return json({ ok: false, error: { code: "ATTACHMENT_NOT_FOUND" } }, 404);
+    const encodedName = encodeURIComponent(attachment.original_name).replace(/[!'()*]/g, (character) =>
+      `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+    );
+    const headers = new Headers({
+      "Cache-Control": "private, no-store",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Type": attachment.mime,
+      "Content-Disposition": `attachment; filename="${contentDispositionName(attachment.original_name)}"; filename*=UTF-8''${encodedName}`,
+    });
+    stored.writeHttpMetadata?.(headers);
+    headers.set("Content-Type", attachment.mime);
+    return new Response(stored.body, { status: 200, headers });
   }
 
   const match = url.pathname.match(/^\/api\/v1\/admin\/leads\/([0-9a-f-]{16,64})$/i);

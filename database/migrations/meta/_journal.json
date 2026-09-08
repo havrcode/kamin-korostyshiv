@@ -29,6 +29,13 @@
       "when": 1788522717913,
       "tag": "0003_magical_warpath",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788870270530,
+      "tag": "0004_bumpy_blink",
+      "breakpoints": true
     }
   ]
 }

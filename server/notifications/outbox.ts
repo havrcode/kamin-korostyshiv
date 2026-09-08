@@ -21,6 +21,7 @@ interface OutboxCandidateRow {
   phone_normalized: string;
   category_snapshot: string;
   message: string | null;
+  attachment_count: number;
 }
 
 interface ClaimedAttemptRow {
@@ -35,6 +36,7 @@ export interface ClaimedOutboxEvent {
   phoneNormalized: string;
   categorySnapshot: string;
   message: string | null;
+  attachmentCount: number;
   attemptCount: number;
   lockToken: number;
 }
@@ -83,7 +85,9 @@ export async function claimOutboxBatch(
          leads.name,
          leads.phone_normalized,
          leads.category_snapshot,
-         leads.message
+         leads.message,
+         (SELECT COUNT(*) FROM lead_attachments AS attachments
+          WHERE attachments.lead_id = leads.id) AS attachment_count
        FROM notification_outbox AS outbox
        INNER JOIN leads ON leads.id = outbox.lead_id
        WHERE outbox.channel = 'TELEGRAM'
@@ -136,6 +140,7 @@ export async function claimOutboxBatch(
       phoneNormalized: candidate.phone_normalized,
       categorySnapshot: candidate.category_snapshot,
       message: candidate.message,
+      attachmentCount: Number(candidate.attachment_count ?? 0),
       attemptCount: attempt.attempt_count,
       lockToken: nowMs,
     });

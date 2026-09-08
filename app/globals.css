@@ -209,6 +209,8 @@ h2 { margin: 0; font-size: clamp(42px, 5vw, 66px); line-height: 1.04; }
 .contact-form input, .contact-form select, .contact-form textarea { width: 100%; border: 0; border-bottom: 1px solid rgba(0,0,0,.22); background: transparent; border-radius: 0; padding: 10px 2px 13px; outline: none; color: var(--ink); font-size: 14px; }
 .contact-form input:focus, .contact-form select:focus, .contact-form textarea:focus { border-color: var(--bronze); }
 .contact-form textarea { resize: vertical; }
+.form-attachment input { border: 1px solid rgba(22,25,28,.22); border-bottom: 1px solid rgba(22,25,28,.22); padding: 10px; background: rgba(255,255,255,.45); font-size: 12px; }
+.form-attachment small { color: var(--muted); font-size: 11px; line-height: 1.45; }
 .contact-form .full { grid-column: 1 / -1; }
 .contact-form button.full { grid-column: 1 / -1; border: 0; }
 .selected-interest { margin: 0; padding: 11px 13px; display: flex; align-items: center; gap: 8px; background: rgba(165,132,85,.13); color: #5f4a2e; font-size: 12px; }
@@ -381,11 +383,15 @@ footer { background: #111315; color: #fff; padding: 55px 0 24px; }
 .admin-media-replace { position: relative; padding: 3px 0; border-bottom: 1px solid currentColor; color: var(--ink); cursor: pointer; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
 .admin-media-replace input { position: absolute; inset: 0; width: 100% !important; min-height: 100% !important; padding: 0 !important; border: 0 !important; opacity: 0; cursor: pointer; }
 .admin-table-wrap { margin-top: 45px; overflow-x: auto; background: #fff; }
-.admin-table { width: 100%; border-collapse: collapse; min-width: 900px; font-size: 12px; }
+.admin-table { width: 100%; border-collapse: collapse; min-width: 1040px; font-size: 12px; }
 .admin-table th, .admin-table td { padding: 16px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 .admin-table th { color: var(--muted); text-transform: uppercase; letter-spacing: .09em; font-size: 9px; }
 .admin-table td a, .admin-table td small { display: block; margin-top: 5px; color: var(--muted); }
 .admin-table td small { white-space: pre-line; }
+.admin-attachment-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 5px; min-width: 160px; }
+.admin-attachment-list li { display: grid; gap: 2px; }
+.admin-attachment-list a { overflow-wrap: anywhere; }
+.admin-attachment-list small { margin-top: 0 !important; }
 .admin-table select { min-width: 130px; padding: 8px; border: 1px solid var(--line); background: #fff; }
 .admin-catalog-status { margin-top: 70px; padding-top: 48px; border-top: 1px solid var(--line); max-width: 860px; }
 .admin-catalog-status h2 { margin: 0; font-size: 38px; }

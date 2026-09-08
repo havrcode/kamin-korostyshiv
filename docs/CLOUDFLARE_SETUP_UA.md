@@ -113,6 +113,10 @@ Wrangler покаже `database_id`. Його можна записувати в
 npx wrangler d1 migrations apply kamin-korostyshiv-production --remote --config worker/wrangler.production.jsonc
 ```
 
+Міграція `0004_bumpy_blink.sql` створює `lead_attachments` для метаданих фото
+із форми. Її потрібно застосувати до розгортання Worker, який читає вкладення в
+адмінці.
+
 Після застосування Cloudflare робить точку відновлення. Перелік команд D1:
 <https://developers.cloudflare.com/d1/wrangler-commands/>.
 
@@ -125,6 +129,7 @@ npx wrangler d1 migrations apply kamin-korostyshiv-production --remote --config 
 ```bash
 npx wrangler r2 bucket create kaminchyk-product-originals
 npx wrangler r2 bucket create kaminchyk-product-public
+npx wrangler r2 bucket create kaminchyk-lead-attachments
 ```
 
 1. У `worker/wrangler.production.example.jsonc` уже підготовлені bindings
@@ -135,7 +140,10 @@ npx wrangler r2 bucket create kaminchyk-product-public
    `media.kaminchyk.com.ua`. Не вмикати public `r2.dev` для production.
 4. Вписати цей URL у `MEDIA_PUBLIC_BASE_URL`. Приватному bucket-у оригіналів
    custom domain не підключати.
-5. Міграція `0003_magical_warpath.sql` вже входить у команду з §5. Якщо D1
+5. Binding `LEAD_ATTACHMENTS` призначений для приватних фото з форм заявок.
+   Не підключати до нього custom domain і не вмикати public `r2.dev`.
+6. Міграція `0003_magical_warpath.sql` та `0004_bumpy_blink.sql` входять у
+   команду з §5. Якщо D1
    було створено до версії `v1.1.11`, повторити цю команду один раз після
    оновлення файлів проєкту.
 
@@ -257,10 +265,12 @@ npx wrangler deploy --config worker/wrangler.production.jsonc
 4. тестова заявка повертає номер `KK-YYYYMMDD-XXXXXXXX`;
 5. заявка є в `/admin` навіть якщо Telegram тимчасово недоступний;
 6. Telegram отримав той самий номер;
-7. повтор із тим самим idempotency key не створив другу заявку;
-8. стороння email-адреса не входить у `/admin`;
-9. `robots.txt` і `sitemap.xml` відкриваються;
-10. у репозиторії немає secrets.
+7. тестова заявка з одним фото показує вкладення в адмінці та не відкриває
+   файл без Access;
+8. повтор із тим самим idempotency key не створив другу заявку;
+9. стороння email-адреса не входить у `/admin`;
+10. `robots.txt` і `sitemap.xml` відкриваються;
+11. у репозиторії немає secrets.
 
 ## 12. Відновлення D1
 

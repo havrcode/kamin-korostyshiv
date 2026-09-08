@@ -1,4 +1,5 @@
 import type { ValidatedLeadInput } from "./validation.ts";
+import type { LeadAttachmentInput } from "./attachments.ts";
 
 export interface D1PreparedStatementLike {
   bind(...values: unknown[]): D1PreparedStatementLike;
@@ -15,6 +16,7 @@ export interface PersistLeadInput {
   idempotencyKey: string;
   lead: ValidatedLeadInput;
   sourceUrl: string | null;
+  attachments?: LeadAttachmentInput[];
 }
 
 export interface PersistLeadResult {
@@ -116,9 +118,25 @@ export async function createLeadWithOutbox(
       )
       .bind(outboxId, leadId, timestampMs, timestampMs, timestampMs);
 
+    const insertAttachments = (input.attachments ?? []).map((attachment) => database
+      .prepare(
+        `INSERT INTO lead_attachments (
+           id, lead_id, storage_key, original_name, mime, bytes, created_at
+         ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .bind(
+        attachment.id,
+        leadId,
+        attachment.storageKey,
+        attachment.originalName,
+        attachment.mime,
+        attachment.bytes,
+        timestampMs,
+      ));
+
     try {
       // Cloudflare D1 виконує всі statements у batch як одну транзакцію.
-      await database.batch([insertLead, insertOutbox]);
+      await database.batch([insertLead, insertOutbox, ...insertAttachments]);
       return { publicNumber, replayed: false };
     } catch (error) {
       if (!isUniqueConstraintError(error)) throw error;

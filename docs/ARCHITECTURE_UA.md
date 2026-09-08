@@ -84,12 +84,14 @@ database/
     0001...sql               product_id
     0002...sql               admin_audit_log
     0003...sql               product_images, R2 metadata і soft-delete
+    0004...sql               приватні lead attachments
 server/
   admin/                     Access JWT і захищений admin API
     media.ts                 R2 upload, Images WebP і product image API
   estimates/                 internal/client calculator
   leads/
     http.ts                  HTTP-межа, розмір, rate limit і відповіді
+    attachments.ts           формати, сигнатури, імена й ліміти фото
     repository.ts            D1 batch, idempotency та публічний номер
     validation.ts            контракт, нормалізація й валідація заявки
   security/turnstile.ts      server-side anti-bot перевірка
@@ -375,13 +377,15 @@ outbox → Telegram → адмінка.
 
 Поточний потік перевірки:
 
-1. honeypot `website` має бути порожнім;
-2. ім’я обрізається по краях і має довжину 2–80 символів;
-3. `normalizeUkrainianPhone()` приймає `+380`, локальний `0XXXXXXXXX` або
+1. для multipart заявки спочатку перевіряються кількість, сукупний розмір і
+   фактичні сигнатури вкладень; дозволені JPEG, PNG, WebP та HEIC;
+2. honeypot `website` має бути порожнім;
+3. ім’я обрізається по краях і має довжину 2–80 символів;
+4. `normalizeUkrainianPhone()` приймає `+380`, локальний `0XXXXXXXXX` або
    дев’ять цифр і зберігає тільки `+380XXXXXXXXX`;
-4. `categoryId` за наявності має бути безпечним slug;
-5. snapshot категорії та повідомлення мають обмежену довжину;
-6. згода має бути явно `true`, а її версія фіксується як
+5. `categoryId` за наявності має бути безпечним slug;
+6. snapshot категорії та повідомлення мають обмежену довжину;
+7. згода має бути явно `true`, а її версія фіксується як
    `lead-contact-v1`.
 
 `db/schema.ts` описує `leads`, `notification_outbox` і `admin_audit_log`.
@@ -393,7 +397,7 @@ outbox → Telegram → адмінка.
 індекс `status + next_attempt_at + locked_at` підготовлений для атомарного
 захоплення доступної пачки подій воркером. Стан `FAILED` не видаляє заявку.
 
-Файли `database/migrations/0000...0003.sql` утворюють послідовну незмінну
+Файли `database/migrations/0000...0004.sql` утворюють послідовну незмінну
 історію: базові заявки/outbox → `product_id` → audit log. Застосовану міграцію
 не редагують; наступна зміна схеми створює новий файл.
 
@@ -413,10 +417,10 @@ outbox → Telegram → адмінка.
 `server/leads/http.ts` виконує перевірки в чіткому порядку:
 
 1. дозволяє тільки шлях `/api/v1/leads` і метод `POST`;
-2. приймає тільки `application/json`;
+2. приймає `application/json` або `multipart/form-data` для фото-вкладень;
 3. вимагає `Idempotency-Key` довжиною 16–128 безпечних символів;
 4. відмовляє з `503`, якщо D1, rate limiter або Turnstile secret не підключені;
-5. читає stream із реальною межею 16 КіБ, навіть якщо `Content-Length` збрехав;
+5. читає JSON із межею 16 КіБ або multipart із межами вкладень;
 6. викликає `validateLeadInput()`;
 7. перевіряє Cloudflare rate limit за контрольованим `CF-Connecting-IP`;
 8. перевіряє Turnstile server-side;
@@ -446,6 +450,13 @@ outbox → Telegram → адмінка.
 `worker/wrangler.jsonc` поки не містить реальних binding IDs. Це навмисно:
 dry-run доводить, що Worker компілюється, але випадковий запуск без production
 налаштувань не може приймати заявки. Публічна Sites-форма все ще локальна.
+
+Для multipart заявки `request.formData()` отримує поля та файли після обмеження
+`Content-Length`; Worker додатково перевіряє до 3 файлів, 6 МБ кожен, 18 МБ
+разом і magic bytes. Після успішного Turnstile оригінали пишуться у приватний
+R2, а їхні метадані додаються до того самого D1 batch, що й `lead` та outbox.
+Якщо запис не вдався, вже завантажені об’єкти прибираються. Повтор із тим самим
+idempotency key не створює нову заявку, а тимчасові дублікати файлів видаляються.
 
 ## 14. Telegram outbox у 0.1.5
 
@@ -512,6 +523,10 @@ HTML, але всі поля заявки спочатку екрануютьс�
 захоплює рядки. Поточний Sites залишається статичним, тому ці secrets у нього
 не додані, реальна форма нічого не надсилає.
 
+Для заявки з фото Telegram у цьому релізі отримує лише кількість вкладень і
+примітку, що вони доступні в захищеній адмінці. Самі файли не передаються в
+Telegram автоматично до окремого погодження конкретного одержувача.
+
 ## 15. Каталог і статичні маршрути
 
 `app/data/catalog.ts` є єдиним публічним джерелом demo-каталогу. `Category` і
@@ -539,7 +554,7 @@ canonical/OG із тих самих даних, тому заголовок і �
 
 1. route/method/content type/idempotency;
 2. наявність D1, rate limiter і Turnstile secret;
-3. обмежене читання JSON до 16 КіБ;
+3. обмежене читання JSON до 16 КіБ або multipart до 18 МБ із лімітами файлів;
 4. серверна нормалізація полів і honeypot;
 5. rate limit за `CF-Connecting-IP`;
 6. `verifyTurnstile()` через `siteverify` з timeout;

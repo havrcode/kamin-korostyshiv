@@ -100,6 +100,46 @@ test("accepts a valid lead only with D1 and rate-limit bindings", async () => {
   assert.ok(response.headers.get("X-Request-Id"));
 });
 
+test("accepts image attachments in multipart leads and stores only validated bytes", async () => {
+  const database = new ApiDatabase();
+  const storedKeys: string[] = [];
+  const form = new FormData();
+  form.set("name", "Сергій");
+  form.set("phone", "+38 (066) 057-09-87");
+  form.set("categoryId", "single-monuments");
+  form.set("productId", "prod-single-vertical");
+  form.set("categorySnapshot", "Одинарні пам’ятники");
+  form.set("message", "Потрібен такий виріб");
+  form.set("consentAccepted", "true");
+  form.set("turnstileToken", "test-token-valid-123");
+  form.append("attachments", new File([
+    new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+  ], "reference.png", { type: "image/png" }));
+
+  const response = await handleLeadApiRequest(new Request("https://example.com/api/v1/leads", {
+    method: "POST",
+    headers: {
+      "Idempotency-Key": "multipart-key-123456",
+      "CF-Connecting-IP": "203.0.113.10",
+      Referer: "https://example.com/catalog",
+    },
+    body: form,
+  }), {
+    DB: database,
+    TURNSTILE_SECRET_KEY: "test-secret",
+    LEAD_RATE_LIMITER: { async limit() { return { success: true }; } },
+    LEAD_ATTACHMENTS: {
+      async put(key) { storedKeys.push(key); },
+      async get() { return null; },
+      async delete(key) { storedKeys.splice(storedKeys.indexOf(key), 1); },
+    },
+  }, { turnstileFetcher: async () => Response.json({ success: true }) });
+
+  assert.equal(response.status, 201);
+  assert.equal(database.batchCount, 1);
+  assert.equal(storedKeys.length, 1);
+});
+
 test("fails closed when server bindings are absent", async () => {
   const response = await handleLeadApiRequest(validRequest(), {});
   const body = (await response.json()) as { error: { code: string } };

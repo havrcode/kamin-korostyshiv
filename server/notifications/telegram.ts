@@ -4,6 +4,7 @@ export interface TelegramLeadNotification {
   phoneNormalized: string;
   categorySnapshot: string;
   message: string | null;
+  attachmentCount?: number;
 }
 
 export type TelegramDeliveryResult =
@@ -37,6 +38,10 @@ export function formatTelegramLead(notification: TelegramLeadNotification): stri
 
   if (notification.message) {
     lines.push(`Побажання: ${escapeTelegramHtml(notification.message)}`);
+  }
+
+  if (notification.attachmentCount && notification.attachmentCount > 0) {
+    lines.push(`Вкладення: ${notification.attachmentCount} фото доступні в захищеній адмінці`);
   }
 
   return lines.join("\n");

@@ -30,6 +30,25 @@ export const leads = sqliteTable(
   ],
 );
 
+export const leadAttachments = sqliteTable(
+  "lead_attachments",
+  {
+    id: text("id").primaryKey(),
+    leadId: text("lead_id")
+      .notNull()
+      .references(() => leads.id, { onDelete: "cascade" }),
+    storageKey: text("storage_key").notNull(),
+    originalName: text("original_name").notNull(),
+    mime: text("mime").notNull(),
+    bytes: integer("bytes").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [
+    uniqueIndex("lead_attachments_storage_key_unique").on(table.storageKey),
+    index("lead_attachments_lead_created_idx").on(table.leadId, table.createdAt),
+  ],
+);
+
 export const notificationOutbox = sqliteTable(
   "notification_outbox",
   {

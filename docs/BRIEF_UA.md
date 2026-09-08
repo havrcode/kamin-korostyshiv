@@ -22,10 +22,10 @@
 ## Поточна база
 
 - GitHub: `havrcode/kamin-korostyshiv`.
-- Актуальна перевірена версія: `v1.1.12` (production media API, responsive
-  nav і розподілене підсвічування CTA).
-- Локальний кандидат після поточної роботи: немає; цей стан готовий до push у
-  GitHub і подальшого production setup власника.
+- Актуальна версія в роботі: `v1.1.13` (вкладення до форми, приватний R2,
+  захищене завантаження в адмінці й індикатор вкладень у Telegram).
+- Самі файли в Telegram поки не пересилаються: це потребує окремого погодження
+  вже налаштованого чату як одержувача клієнтських фото.
 - Стек: React + TypeScript + Next.js App Router.
 - Публічний frontend збирається як static export у `out/`.
 - Vinext/Vite не повертати.
@@ -121,6 +121,10 @@ git log --oneline --decorate -10
 - Production photo API підготовлений у Worker: `product_images` у D1, два R2
   buckets, Images binding, Access/JWT, максимум 5 активних фото, WebP fallback
   і soft-delete. Потрібно лише створити ресурси та заповнити production config.
+
+- Для фото-прикладів у заявці: до 3 файлів, JPEG/PNG/WebP/HEIC, до 6 МБ кожен
+  і до 18 МБ разом. Оригінали приватні в R2, метадані в `lead_attachments`,
+  доступні лише через Cloudflare Access в адмінці.
 
 ## Найближчий крок
 

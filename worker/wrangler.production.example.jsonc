@@ -25,6 +25,10 @@
     {
       "binding": "PRODUCT_MEDIA_PUBLIC",
       "bucket_name": "kaminchyk-product-public"
+    },
+    {
+      "binding": "LEAD_ATTACHMENTS",
+      "bucket_name": "kaminchyk-lead-attachments"
     }
   ],
   "images": {

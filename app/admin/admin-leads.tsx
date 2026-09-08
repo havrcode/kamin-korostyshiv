@@ -11,9 +11,22 @@ type Lead = {
   message: string | null;
   status: string;
   created_at: number;
+  attachments?: Array<{
+    id: string;
+    original_name: string;
+    mime: string;
+    bytes: number;
+    created_at: number;
+    download_url: string;
+  }>;
 };
 
 const statuses = ["NEW", "IN_PROGRESS", "CONTACTED", "CLOSED", "SPAM"];
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
+}
 
 export function AdminLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -58,8 +71,8 @@ export function AdminLeads() {
   return (
     <div className="admin-table-wrap">
       <table className="admin-table">
-        <thead><tr><th>Номер</th><th>Контакт</th><th>Інтерес</th><th>Створено</th><th>Статус</th></tr></thead>
-        <tbody>{leads.map((lead) => <tr key={lead.id}><td><b>{lead.public_number}</b></td><td>{lead.name}<a href={`tel:${lead.phone_normalized}`}>{lead.phone_normalized}</a></td><td>{lead.category_snapshot}{lead.message && <small>{lead.message}</small>}</td><td>{new Date(lead.created_at).toLocaleString("uk-UA")}</td><td><select value={lead.status} onChange={(event) => void updateStatus(lead, event.target.value)}>{statuses.map((status) => <option value={status} key={status}>{status}</option>)}</select></td></tr>)}</tbody>
+        <thead><tr><th>Номер</th><th>Контакт</th><th>Інтерес</th><th>Вкладення</th><th>Створено</th><th>Статус</th></tr></thead>
+        <tbody>{leads.map((lead) => <tr key={lead.id}><td><b>{lead.public_number}</b></td><td>{lead.name}<a href={`tel:${lead.phone_normalized}`}>{lead.phone_normalized}</a></td><td>{lead.category_snapshot}{lead.message && <small>{lead.message}</small>}</td><td>{lead.attachments?.length ? <ul className="admin-attachment-list">{lead.attachments.map((attachment) => <li key={attachment.id}><a href={attachment.download_url} download>{attachment.original_name}</a><small>{formatBytes(attachment.bytes)}</small></li>)}</ul> : <span>—</span>}</td><td>{new Date(lead.created_at).toLocaleString("uk-UA")}</td><td><select value={lead.status} onChange={(event) => void updateStatus(lead, event.target.value)}>{statuses.map((status) => <option value={status} key={status}>{status}</option>)}</select></td></tr>)}</tbody>
       </table>
     </div>
   );
