@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   formatTelegramLead,
+  sendTelegramDocument,
   sendTelegramLead,
 } from "../server/notifications/telegram.ts";
 
@@ -73,4 +74,32 @@ test("does not mark a malformed 200 response as delivered", async () => {
     retryable: true,
     errorCode: "TELEGRAM_INVALID_RESPONSE",
   });
+});
+
+test("sends an attachment as a Telegram document with its original name", async () => {
+  let requestUrl = "";
+  let requestBody: FormData | undefined;
+
+  const result = await sendTelegramDocument(
+    async (input, init) => {
+      requestUrl = String(input);
+      requestBody = init?.body as FormData;
+      return Response.json({ ok: true });
+    },
+    "secret-token",
+    "-1001",
+    {
+      originalName: "приклад.jpg",
+      mime: "image/jpeg",
+      body: new TextEncoder().encode("image-bytes").buffer,
+    },
+  );
+
+  assert.deepEqual(result, { ok: true });
+  assert.match(requestUrl, /\/sendDocument$/);
+  assert.equal(requestBody?.get("chat_id"), "-1001");
+  const document = requestBody?.get("document");
+  assert.ok(document instanceof File);
+  assert.equal(document.name, "приклад.jpg");
+  assert.equal(document.type, "image/jpeg");
 });
