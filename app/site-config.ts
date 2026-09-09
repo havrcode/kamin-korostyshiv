@@ -33,6 +33,7 @@ export const siteConfig = {
   },
   location: "Коростишів, Житомирська область",
   publicUrl: resolvePublicUrl(process.env.NEXT_PUBLIC_SITE_URL),
+  contentLastModified: "2026-09-09T00:00:00.000Z",
   description:
     "Гранітні та мармурові вироби з натурального каменю в Коростишеві: столи й лавки, кам’яні вази, лампадки, підвіконня, стільниці, полиці та декор. Проєктування, виготовлення, доставка й монтаж.",
   catalogNotice:

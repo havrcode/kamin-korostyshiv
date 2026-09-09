@@ -15,6 +15,7 @@ import {
 } from "./components/product-selection-storage";
 import { Icon } from "./components/ui-icon";
 import { RevealObserver } from "./components/reveal-observer";
+import { StructuredData } from "./components/structured-data";
 import { faqs, interestOptions, publishedCategories, resolveProductSelection, resolveProductSelections, stones } from "./data/catalog";
 import { siteConfig } from "./site-config";
 
@@ -29,6 +30,15 @@ export default function Home() {
   const [formError, setFormError] = useState("");
   const currentStone = useMemo(() => stones[activeStone], [activeStone]);
   const selectedProducts = useMemo(() => resolveProductSelections(selectedProductIds), [selectedProductIds]);
+  const faqStructuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map(([question, answer]) => ({
+      "@type": "Question",
+      name: question,
+      acceptedAnswer: { "@type": "Answer", text: answer },
+    })),
+  }), []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -158,6 +168,7 @@ export default function Home() {
 
   return (
     <main>
+      <StructuredData data={faqStructuredData} />
       <RevealObserver />
 
       <header className="site-header">

@@ -32,6 +32,12 @@ export type CatalogProduct = {
   visualization: boolean;
 };
 
+export type ProductSeoProfile = {
+  title: string;
+  alternateNames: readonly string[];
+  description: string;
+};
+
 export type StoneMaterial = {
   name: string;
   origin: string;
@@ -82,6 +88,91 @@ const tableOptions = ["Розмір під ділянку", "Полірован�
 const simpleDecorOptions = ["Висота", "Вид каменю (уточнюємо)"] as const;
 const homeOptions = ["Точний замір", "Профіль краю", "Вирізи за шаблоном", "Доставка й монтаж"] as const;
 export const deliveryOptions = ["Доставимо Новою поштою, Делівері та іншими службами доставки", "Можливий самовивіз за попередньою домовленістю"] as const;
+
+const categorySearchNames: Record<string, readonly string[]> = {
+  "cat-single": ["Пам’ятники із граніту", "Гранітні пам’ятники", "Пам’ятник із натурального каменю"],
+  "cat-family": ["Родинні пам’ятники з граніту", "Подвійні гранітні пам’ятники", "Сімейні пам’ятники з каменю"],
+  "cat-complex": ["Меморіальні комплекси з граніту", "Гранітні меморіальні комплекси", "Комплексне оформлення місця поховання"],
+  "cat-table-benches": ["Гранітні столи", "Кам’яні лавки", "Стіл і лавочка з каменю"],
+  "cat-lamps": ["Кам’яні лампадки", "Гранітні лампадки", "Лампадки для кам’яної композиції"],
+  "cat-vases": ["Кам’яні вази", "Гранітні вази", "Вази з натурального каменю"],
+  "cat-decor": ["Гранітний декор", "Кам’яні декоративні елементи", "Балясини та кулі з каменю"],
+  "cat-home": ["Вироби з каменю для дому", "Гранітні підвіконня", "Кам’яні стільниці та полиці"],
+};
+
+export function getCategorySearchNames(category: CatalogCategory) {
+  return categorySearchNames[category.id] ?? [];
+}
+
+export function getProductSeoProfile(product: CatalogProduct): ProductSeoProfile {
+  const title = product.title;
+  let seoTitle = title;
+  let alternateNames: string[] = [];
+
+  if (/^Стіл з лавкою/.test(title)) {
+    const number = title.match(/№\s*\d+/)?.[0] ?? "";
+    seoTitle = title.replace(/^Стіл з лавкою/, "Гранітний стіл з лавкою");
+    alternateNames = [
+      `Стіл із граніту з лавкою ${number}`.trim(),
+      `Кам’яний стіл з лавкою ${number}`.trim(),
+      `Стіл і лавочка з каменю ${number}`.trim(),
+    ];
+  } else if (/^Стіл №/.test(title)) {
+    seoTitle = title.replace(/^Стіл/, "Гранітний стіл");
+    alternateNames = [
+      title.replace(/^Стіл/, "Стіл із граніту"),
+      title.replace(/^Стіл/, "Кам’яний стіл"),
+    ];
+  } else if (/^Лавка №/.test(title)) {
+    seoTitle = title.replace(/^Лавка/, "Гранітна лавка");
+    alternateNames = [
+      title.replace(/^Лавка/, "Кам’яна лавка"),
+      title.replace(/^Лавка/, "Кам’яна лавочка"),
+    ];
+  } else if (/^Лампадка/.test(title)) {
+    alternateNames = [
+      title.replace(/^Лампадка/, "Кам’яна лампадка"),
+      title.replace(/^Лампадка/, "Гранітна лампадка"),
+      title.replace(/^Лампадка/, "Лампадка для кам’яної композиції"),
+    ];
+  } else if (/^Ваза/.test(title)) {
+    seoTitle = title.replace(/^Ваза/, "Гранітна ваза");
+    alternateNames = [
+      title.replace(/^Ваза/, "Кам’яна ваза"),
+      title.replace(/^Ваза/, "Ваза з натурального каменю"),
+    ];
+  } else if (/^Балясина/.test(title)) {
+    seoTitle = title.replace(/^Балясина/, "Гранітна балясина");
+    alternateNames = [title.replace(/^Балясина/, "Кам’яна балясина")];
+  } else if (/^Куля/.test(title)) {
+    seoTitle = title.replace(/^Куля/, "Гранітна куля");
+    alternateNames = [title.replace(/^Куля/, "Кам’яна куля")];
+  } else if (/^Підвіконня/.test(title)) {
+    seoTitle = title.replace(/^Підвіконня/, "Кам’яне підвіконня");
+    alternateNames = [
+      title.replace(/^Підвіконня/, "Гранітне підвіконня"),
+      title.replace(/^Підвіконня/, "Підвіконня з натурального каменю"),
+    ];
+  } else if (/^Стільниця/.test(title)) {
+    seoTitle = title.replace(/^Стільниця/, "Кам’яна стільниця");
+    alternateNames = [
+      title.replace(/^Стільниця/, "Гранітна стільниця"),
+      title.replace(/^Стільниця/, "Стільниця з натурального каменю"),
+    ];
+  } else if (title === "Камінна полиця") {
+    seoTitle = "Камінна полиця з натурального каменю";
+    alternateNames = ["Кам’яна полиця", "Гранітна камінна полиця", "Мармурова камінна полиця"];
+  } else if (title === "Кам’яний фартух") {
+    alternateNames = ["Гранітний фартух для кухні", "Кам’яне облицювання кухні"];
+  }
+
+  const names = [...new Set([title, seoTitle, ...alternateNames].filter(Boolean))];
+  return {
+    title: seoTitle,
+    alternateNames: names,
+    description: `${seoTitle}. ${product.summary} Виготовлення з натурального каменю в Коростишеві; точні розміри, матеріал, доставка й монтаж узгоджуються перед прорахунком.`,
+  };
+}
 
 const presentationByCategory: Record<string, CategoryPresentation> = {
   "cat-single": {
@@ -805,6 +896,10 @@ export const stones: StoneMaterial[] = [
 ];
 
 export const faqs = [
+  [
+    "Які вироби з натурального каменю можна замовити?",
+    "У каталозі є гранітні столи й лавки, кам’яні вази та лампадки, точений декор, гранітні підвіконня, кам’яні стільниці, полиці та кухонне облицювання. Якщо потрібен інший виріб із граніту, мармуру або іншого каменю, надішліть фото чи ескіз у формі.",
+  ],
   [
     "Чому в каталозі немає цін?",
     "Остаточна вартість залежить від точних розмірів, товщини, каменю, обробки, доставки й монтажу. Тому зараз кожна позиція має чесний статус «Вартість уточнюється».",

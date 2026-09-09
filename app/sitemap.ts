@@ -5,7 +5,7 @@ import { siteConfig } from "./site-config";
 export const dynamic = "force-static";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const updated = new Date("2026-09-05T00:00:00Z");
+  const updated = new Date(siteConfig.contentLastModified);
   const absoluteUrl = (path: string) => new URL(path, siteConfig.publicUrl).toString();
   const entries: MetadataRoute.Sitemap = [
     { url: absoluteUrl("/"), lastModified: updated, changeFrequency: "weekly", priority: 1 },

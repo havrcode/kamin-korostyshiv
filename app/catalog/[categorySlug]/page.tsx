@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CatalogShell } from "../../components/catalog-shell";
 import { ProductCard } from "../../components/product-card";
 import { StructuredData } from "../../components/structured-data";
-import { getCategory, getProductsByCategory, publishedCategories } from "../../data/catalog";
+import { getCategory, getCategorySearchNames, getProductsByCategory, publishedCategories } from "../../data/catalog";
 import { siteConfig } from "../../site-config";
 
 export function generateStaticParams() {
@@ -19,6 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
   return {
     title: `${category.title} — каталог Kaminchyk`,
     description,
+    robots: { index: true, follow: true },
     alternates: { canonical: `/catalog/${category.slug}/` },
     openGraph: {
       title: `${category.title} — Kaminchyk`,
@@ -44,6 +45,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
         "@id": `${siteUrl}${categoryUrl}#page`,
         url: new URL(categoryUrl, siteUrl).toString(),
         name: category.title,
+        alternateName: getCategorySearchNames(category),
+        inLanguage: "uk-UA",
         description: category.text,
         isPartOf: { "@id": `${siteUrl}/#website` },
         mainEntity: {
@@ -53,6 +56,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ categ
             "@type": "ListItem",
             position: index + 1,
             name: product.title,
+            image: new URL(product.image, siteUrl).toString(),
             url: new URL(`${categoryUrl}${product.slug}/`, siteUrl).toString(),
           })),
         },

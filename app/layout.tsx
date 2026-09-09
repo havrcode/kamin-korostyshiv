@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     title: "Kaminchyk",
     description: siteConfig.description,
     type: "website",
+    locale: "uk_UA",
     images: [{ url: "/og-kaminchyk.jpg", width: 1200, height: 630, alt: "Kaminchyk — вироби з граніту та мармуру" }],
   },
   twitter: {

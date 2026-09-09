@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { categories, interestOptions, products, publishedCategories, publishedProducts, resolveProductSelection, resolveProductSelections } from "../app/data/catalog.ts";
+import { categories, getCategorySearchNames, getProductSeoProfile, interestOptions, products, publishedCategories, publishedProducts, resolveProductSelection, resolveProductSelections } from "../app/data/catalog.ts";
 
 test("resolves a product into a valid category option and a separate snapshot", () => {
   const selection = resolveProductSelection(
@@ -51,4 +51,15 @@ test("exposes only explicitly published catalog records", () => {
   assert.ok(publishedProducts.some((product) => product.id === "prod-fireplace-mantel"));
   assert.ok(publishedProducts.some((product) => product.id === "prod-stone-backsplash"));
   assert.ok(!publishedCategories.some((category) => /пам’ятник|Меморіальні/.test(category.title)));
+});
+
+test("builds useful SEO names without exposing hidden monument categories", () => {
+  const product = getProductSeoProfile(publishedProducts.find(({ id }) => id === "prod-table-4")!);
+  assert.equal(product.title, "Гранітний стіл № 4");
+  assert.ok(product.alternateNames.includes("Стіл із граніту № 4"));
+  assert.match(product.description, /натурального каменю в Коростишеві/);
+
+  const monumentCategory = categories.find(({ id }) => id === "cat-single")!;
+  assert.ok(getCategorySearchNames(monumentCategory).includes("Пам’ятники із граніту"));
+  assert.equal(publishedCategories.some(({ id }) => id === monumentCategory.id), false);
 });

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Каталог виробів із граніту та мармуру — Kaminchyk",
   description: siteConfig.description,
   alternates: { canonical: "/catalog/" },
+  robots: { index: true, follow: true },
   openGraph: {
     title: "Каталог виробів із граніту та мармуру — Kaminchyk",
     description: siteConfig.description,
@@ -25,6 +26,7 @@ export default function CatalogPage() {
     "@id": `${siteUrl}/catalog/#page`,
     url: new URL("/catalog/", siteUrl).toString(),
     name: metadata.title,
+    inLanguage: "uk-UA",
     description: siteConfig.description,
     isPartOf: { "@id": `${siteUrl}/#website` },
     mainEntity: {
@@ -34,6 +36,7 @@ export default function CatalogPage() {
         "@type": "ListItem",
         position: index + 1,
         name: category.title,
+        image: new URL(category.image, siteUrl).toString(),
         url: new URL(`/catalog/${category.slug}/`, siteUrl).toString(),
       })),
     },
