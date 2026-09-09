@@ -32,8 +32,9 @@ test("summarizes several selected products for one lead", () => {
   assert.equal(selection.primaryProductId, "prod-table-2");
   assert.equal(selection.categoryValue, "Стіл або лавка з граніту");
   assert.equal(selection.label, "Оформлення: 2 товари");
-  assert.match(selection.messageLine, /Столи та лавки: Стіл № 2/);
-  assert.match(selection.messageLine, /Столи та лавки: Лавка № 2/);
+  assert.match(selection.messageLine, /Обрані товари:/);
+  assert.match(selection.messageLine, /1\. Столи та лавки: Стіл № 2/);
+  assert.match(selection.messageLine, /2\. Столи та лавки: Лавка № 2/);
 });
 
 test("exposes only explicitly published catalog records", () => {

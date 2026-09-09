@@ -742,7 +742,11 @@ export function resolveProductSelections(productIds: readonly string[]): Product
     ? selected[0].product.title
     : `Оформлення: ${productCountLabel(selected.length)}`;
   const productLabels = selected.map(({ category, product }) => `${category.title}: ${product.title}`);
-  const messageLine = `Обрані товари: ${productLabels.join("; ")}`;
+  const messageLine = [
+    "Обрані товари:",
+    ...productLabels.map((productLabel, index) => `${index + 1}. ${productLabel}`),
+    "",
+  ].join("\n");
 
   return {
     productIds: selected.map(({ product }) => product.id),

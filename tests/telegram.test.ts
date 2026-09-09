@@ -11,7 +11,7 @@ const notification = {
   name: "Сергій <admin>",
   phoneNormalized: "+380660570987",
   categorySnapshot: "Стела & підставка",
-  message: "Текст > тест",
+  message: "Обрані товари:\n1. Столи та лавки: Стіл № 2\n2. Столи та лавки: Лавка № 2\n\nТекст > тест",
   attachmentCount: 2,
 };
 
@@ -22,8 +22,12 @@ test("escapes all user-controlled Telegram HTML fields", () => {
   assert.match(text, /KK-1&lt;&amp;&gt;/);
   assert.match(text, /Сергій &lt;admin&gt;/);
   assert.match(text, /Стела &amp; підставка/);
+  assert.match(text, /📞 <b>Телефон:<\/b> <a href="tel:\+380660570987">\+380660570987<\/a>/);
+  assert.match(text, /🛒 <b>Вибрані товари:<\/b>/);
+  assert.match(text, /1\. Столи та лавки: Стіл № 2/);
+  assert.match(text, /2\. Столи та лавки: Лавка № 2/);
   assert.match(text, /Текст &gt; тест/);
-  assert.match(text, /Вкладення: 2 фото доступні в захищеній адмінці/);
+  assert.match(text, /📎 <b>Фото:<\/b> 2 доступні в захищеній адмінці/);
 });
 
 test("classifies Telegram 401 as a permanent error without leaking the token", async () => {

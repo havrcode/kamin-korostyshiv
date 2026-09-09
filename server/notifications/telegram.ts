@@ -34,20 +34,53 @@ export function escapeTelegramHtml(value: string): string {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 }
 
+function splitLeadMessage(message: string | null): { products: string[]; note: string | null } {
+  if (!message) return { products: [], note: null };
+
+  const lines = message.split(/\r?\n/);
+  if (lines[0]?.trim() !== "Обрані товари:") {
+    return { products: [], note: message.trim() || null };
+  }
+
+  const separatorIndex = lines.slice(1).findIndex((line) => line.trim() === "");
+  const productEnd = separatorIndex === -1 ? lines.length : separatorIndex + 1;
+  const products = lines
+    .slice(1, productEnd)
+    .map((line) => line.match(/^\s*\d+\.\s+(.+)$/)?.[1]?.trim() ?? "")
+    .filter(Boolean);
+  const note = separatorIndex === -1
+    ? null
+    : lines.slice(productEnd + 1).join("\n").trim() || null;
+
+  return { products, note };
+}
+
+function formatTelegramPhone(phone: string): string {
+  const phoneHref = phone.replace(/[^+\d]/g, "");
+  return `<a href="tel:${phoneHref}">${escapeTelegramHtml(phone)}</a>`;
+}
+
 export function formatTelegramLead(notification: TelegramLeadNotification): string {
+  const message = splitLeadMessage(notification.message);
   const lines = [
-    `<b>Нова заявка ${escapeTelegramHtml(notification.publicNumber)}</b>`,
-    `Ім’я: ${escapeTelegramHtml(notification.name)}`,
-    `Телефон: <code>${escapeTelegramHtml(notification.phoneNormalized)}</code>`,
-    `Категорія: ${escapeTelegramHtml(notification.categorySnapshot)}`,
+    `<b>🔔 НОВА ЗАЯВКА</b> <code>${escapeTelegramHtml(notification.publicNumber)}</code>`,
+    "",
+    `👤 <b>Клієнт:</b> ${escapeTelegramHtml(notification.name)}`,
+    `📞 <b>Телефон:</b> ${formatTelegramPhone(notification.phoneNormalized)}`,
+    `🧭 <b>Напрям:</b> ${escapeTelegramHtml(notification.categorySnapshot)}`,
   ];
 
-  if (notification.message) {
-    lines.push(`Побажання: ${escapeTelegramHtml(notification.message)}`);
+  if (message.products.length > 0) {
+    lines.push("", "🛒 <b>Вибрані товари:</b>");
+    lines.push(...message.products.map((product, index) => `${index + 1}. ${escapeTelegramHtml(product)}`));
+  }
+
+  if (message.note) {
+    lines.push("", `💬 <b>Побажання:</b>\n${escapeTelegramHtml(message.note)}`);
   }
 
   if (notification.attachmentCount && notification.attachmentCount > 0) {
-    lines.push(`Вкладення: ${notification.attachmentCount} фото доступні в захищеній адмінці`);
+    lines.push("", `📎 <b>Фото:</b> ${notification.attachmentCount} доступні в захищеній адмінці`);
   }
 
   return lines.join("\n");
