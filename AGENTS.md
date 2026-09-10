@@ -11,6 +11,13 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
 
+### Канонічна робоча папка
+
+- Основний Git-репозиторій і єдине джерело коду проєкту: `/Users/Serhiy/Documents/Codex/kamin-korostyshiv`.
+- Workspace `/Users/Serhiy/Documents/Codex/2026-08-31-kaminkor-com-ua-chatgpt-codex-agents-5` — лише контейнер контексту Codex: він не є Git-репозиторієм і не містить сайту.
+- Перед Git, CodeGraph, Next.js або Sites-операціями перевіряти `pwd`, `git rev-parse --show-toplevel` і `git status -sb`. Якщо поточна папка не є канонічним репозиторієм, перейти до `/Users/Serhiy/Documents/Codex/kamin-korostyshiv`.
+- Не створювати в workspace `agents-5` `.codegraph`, `node_modules`, `.next`, `out` чи Git-коміти. Не змішувати його `work/` із проєктною папкою `work/`.
+
 ### Практичне використання CodeGraph у цьому проєкті
 
 - На старті задачі перевіряти `codegraph status`. Якщо індекс свіжий, першим

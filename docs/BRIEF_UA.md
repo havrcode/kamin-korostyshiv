@@ -21,6 +21,7 @@
 
 ## Поточна база
 
+- Канонічна локальна робоча папка: `/Users/Serhiy/Documents/Codex/kamin-korostyshiv`. Workspace `2026-08-31-kaminkor-com-ua-chatgpt-codex-agents-5` не містить source-коду й не використовується для Git, CodeGraph, збірки або Sites.
 - GitHub: `havrcode/kamin-korostyshiv`.
 - Актуальна версія в роботі: `v1.1.17` (SEO товарів і категорій, FAQ/AI-crawlers,
   вкладення до форми, приватний R2,
