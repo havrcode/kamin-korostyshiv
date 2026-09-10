@@ -2,8 +2,8 @@
 
 /* eslint-disable @next/next/no-img-element -- Каталожні WebP уже оптимізовані; native img не створює зайвих Worker-викликів. */
 
-import type { CSSProperties, FormEvent } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { ChangeEvent, CSSProperties, FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import Link from "next/link";
 import { BrandLogo } from "./components/brand-logo";
@@ -19,6 +19,16 @@ import { StructuredData } from "./components/structured-data";
 import { faqs, interestOptions, publishedCategories, resolveProductSelection, resolveProductSelections, stones } from "./data/catalog";
 import { siteConfig } from "./site-config";
 
+const MAX_ATTACHMENT_COUNT = 3;
+const MAX_ATTACHMENT_BYTES = 6 * 1024 * 1024;
+const MAX_ATTACHMENT_TOTAL_BYTES = 18 * 1024 * 1024;
+
+type AttachmentPreview = { file: File; url: string };
+
+function formatAttachmentSize(bytes: number) {
+  return `${(bytes / (1024 * 1024)).toFixed(bytes >= 1024 * 1024 ? 1 : 2)} МБ`;
+}
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeStone, setActiveStone] = useState(0);
@@ -26,10 +36,23 @@ export default function Home() {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [submitState, setSubmitState] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [publicNumber, setPublicNumber] = useState("");
-  const [attachmentLabel, setAttachmentLabel] = useState("");
+  const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
   const [formError, setFormError] = useState("");
+  const attachmentInputRef = useRef<HTMLInputElement>(null);
   const currentStone = useMemo(() => stones[activeStone], [activeStone]);
   const selectedProducts = useMemo(() => resolveProductSelections(selectedProductIds), [selectedProductIds]);
+  const attachmentPreviews = useMemo<AttachmentPreview[]>(() => (
+    typeof window === "undefined"
+      ? []
+      : attachmentFiles.map((file) => ({ file, url: URL.createObjectURL(file) }))
+  ), [attachmentFiles]);
+  const attachmentValidationMessage = useMemo(() => {
+    if (attachmentFiles.some((file) => file.size > MAX_ATTACHMENT_BYTES)) return "Окреме фото має бути до 6 МБ.";
+    if (attachmentFiles.reduce((total, file) => total + file.size, 0) > MAX_ATTACHMENT_TOTAL_BYTES) {
+      return "Усі фото разом мають бути до 18 МБ.";
+    }
+    return "";
+  }, [attachmentFiles]);
   const faqStructuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -39,6 +62,10 @@ export default function Home() {
       acceptedAnswer: { "@type": "Answer", text: answer },
     })),
   }), []);
+
+  useEffect(() => {
+    return () => attachmentPreviews.forEach(({ url }) => URL.revokeObjectURL(url));
+  }, [attachmentPreviews]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -123,17 +150,17 @@ export default function Home() {
     const rawMessage = typeof messageEntry === "string" ? messageEntry.trim() : "";
     const message = [selectedProducts?.messageLine, rawMessage].filter(Boolean).join("\n") || null;
     const attachments = data.getAll("attachments").filter((entry): entry is File => entry instanceof File && entry.size > 0);
-    if (attachments.length > 3) {
+    if (attachments.length > MAX_ATTACHMENT_COUNT) {
       setFormError("Додайте не більше трьох зображень.");
       setSubmitState("error");
       return;
     }
-    if (attachments.some((file) => file.size > 6 * 1024 * 1024)) {
+    if (attachments.some((file) => file.size > MAX_ATTACHMENT_BYTES)) {
       setFormError("Кожне зображення має бути до 6 МБ.");
       setSubmitState("error");
       return;
     }
-    if (attachments.reduce((total, file) => total + file.size, 0) > 18 * 1024 * 1024) {
+    if (attachments.reduce((total, file) => total + file.size, 0) > MAX_ATTACHMENT_TOTAL_BYTES) {
       setFormError("Усі зображення разом мають бути до 18 МБ.");
       setSubmitState("error");
       return;
@@ -157,13 +184,48 @@ export default function Home() {
       setPublicNumber(payload.lead.publicNumber);
       setSubmitState("success");
       setSelectedProductIds(writeSelectedProductIds([]));
-      setAttachmentLabel("");
+      setAttachmentFiles([]);
       setFormError("");
       form.reset();
     } catch {
       setFormError("Не вдалося зберегти заявку. Дані не підтверджені як надіслані — будь ласка, зателефонуйте.");
       setSubmitState("error");
     }
+  }
+
+  function syncAttachmentInput(files: File[]) {
+    setAttachmentFiles(files);
+    const input = attachmentInputRef.current;
+    if (!input || typeof DataTransfer === "undefined") return;
+    const transfer = new DataTransfer();
+    files.forEach((file) => transfer.items.add(file));
+    input.files = transfer.files;
+  }
+
+  function handleAttachmentChange(event: ChangeEvent<HTMLInputElement>) {
+    const incoming = Array.from(event.currentTarget.files ?? []);
+    const next = [...attachmentFiles, ...incoming].filter((file, index, files) => (
+      files.findIndex((candidate) => (
+        candidate.name === file.name
+        && candidate.size === file.size
+        && candidate.lastModified === file.lastModified
+      )) === index
+    ));
+    if (next.length > MAX_ATTACHMENT_COUNT) {
+      setFormError("Додайте не більше трьох зображень.");
+      setSubmitState("error");
+      syncAttachmentInput(next.slice(0, MAX_ATTACHMENT_COUNT));
+      return;
+    }
+    setFormError("");
+    if (submitState === "error") setSubmitState("idle");
+    syncAttachmentInput(next);
+  }
+
+  function removeAttachment(index: number) {
+    setFormError("");
+    if (submitState === "error") setSubmitState("idle");
+    syncAttachmentInput(attachmentFiles.filter((_, fileIndex) => fileIndex !== index));
   }
 
   return (
@@ -305,7 +367,7 @@ export default function Home() {
         {submitState === "success" ? <div className="form-success" role="status"><span><Icon name="check" /></span><h3>{`Заявку ${publicNumber} збережено`}</h3><p>Майстер отримає сповіщення й зв’яжеться з вами. Збережіть номер заявки.</p><button type="button" onClick={() => setSubmitState("idle")}>Повернутися до форми</button></div> :
           <form className="contact-form" onSubmit={submitForm} aria-describedby="form-preview-note">
             {selectedProducts ? <div className="selected-products full"><div><Icon name="check" /><p>Обрано для оформлення: <b>{selectedProducts.label}</b></p><button type="button" onClick={clearProductSelection}>Очистити</button></div><ul>{selectedProducts.productLabels.map((label) => <li key={label}>{label}</li>)}</ul></div> : selectedInterest && <p className="selected-interest full"><Icon name="check" />Обрано: <b>{selectedInterest}</b></p>}
-            <label><span>Ваше ім’я</span><input name="name" type="text" placeholder="Як до вас звертатися" autoComplete="name" minLength={2} maxLength={80} required /></label><label><span>Номер телефону</span><input name="phone" type="tel" placeholder="+38 (___) ___-__-__" autoComplete="tel" required /></label><label><span>Що вас цікавить?</span><select name="categoryId" value={selectedInterest} onChange={(event) => chooseInterest(event.target.value)} required><option value="" disabled>Оберіть категорію</option>{interestOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label><label className="full"><span>Коротко про побажання</span><textarea name="message" rows={3} maxLength={2000} placeholder="Матеріал, форма, орієнтовний бюджет або посилання на приклад"></textarea></label><label className="form-attachment full"><span>Фото або приклад виробу (необов’язково)</span><input name="attachments" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onChange={(event) => setAttachmentLabel(Array.from(event.target.files ?? []).map((file) => file.name).join(", "))} /><small>{attachmentLabel || "До 3 зображень, до 6 МБ кожне. Фото допоможе точніше зрозуміти побажання."}</small></label><label className="honeypot" aria-hidden="true"><span>Сайт</span><input name="website" tabIndex={-1} autoComplete="off" /></label><label className="consent full"><input name="consentAccepted" type="checkbox" required /><span>Погоджуюся на використання контактних даних. <a href="/privacy/">Докладніше</a></span></label>{siteConfig.leads.turnstileSiteKey ? <div className="turnstile full"><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" /><div className="cf-turnstile" data-sitekey={siteConfig.leads.turnstileSiteKey} data-theme="light"></div></div> : <p className="form-error full">Форма тимчасово недоступна: не налаштований публічний ключ Turnstile.</p>} {(formError || submitState === "error") && <p className="form-error full" role="alert">{formError || "Не вдалося зберегти заявку. Дані не підтверджені як надіслані — будь ласка, зателефонуйте."}</p>}<button className="button primary dark full" type="submit" disabled={submitState === "submitting" || !siteConfig.leads.turnstileSiteKey}>{submitState === "submitting" ? "Надсилаємо…" : "Надіслати заявку"} <Icon name="arrow" /></button><small className="form-policy" id="form-preview-note">Надсилаючи форму, ви підтверджуєте згоду версії {siteConfig.leads.consentVersion}. <a href="/privacy/">Політика конфіденційності</a></small>
+            <label><span>Ваше ім’я</span><input name="name" type="text" placeholder="Як до вас звертатися" autoComplete="name" minLength={2} maxLength={80} required /></label><label><span>Номер телефону</span><input name="phone" type="tel" placeholder="+38 (___) ___-__-__" autoComplete="tel" required /></label><label><span>Що вас цікавить?</span><select name="categoryId" value={selectedInterest} onChange={(event) => chooseInterest(event.target.value)} required><option value="" disabled>Оберіть категорію</option>{interestOptions.map((option) => <option value={option} key={option}>{option}</option>)}</select></label><label className="full"><span>Коротко про побажання</span><textarea name="message" rows={3} maxLength={2000} placeholder="Матеріал, форма, орієнтовний бюджет або посилання на приклад"></textarea></label><div className="form-attachment full"><span className="form-attachment-label">Фото або приклад виробу (необов’язково)</span><input ref={attachmentInputRef} id="attachment-input" className="form-attachment-input" name="attachments" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple onChange={handleAttachmentChange} /><>{attachmentFiles.length < MAX_ATTACHMENT_COUNT && <label className="form-attachment-dropzone" htmlFor="attachment-input"><Icon name="plus" /><span><b>{attachmentFiles.length > 0 ? "Додати ще фото" : "Додати фото"}</b><small>JPG, PNG, WebP або HEIC</small></span></label>}</><>{attachmentPreviews.length > 0 && <div className="form-attachment-list" aria-live="polite">{attachmentPreviews.map(({ file, url }, index) => <div className="form-attachment-item" key={`${file.name}-${file.lastModified}-${index}`}><img src={url} alt="" /><span className="form-attachment-info"><b title={file.name}>{file.name}</b><small>{formatAttachmentSize(file.size)}</small></span><button className="form-attachment-remove" type="button" onClick={() => removeAttachment(index)} aria-label={`Видалити ${file.name}`} title="Видалити файл"><Icon name="x" /></button></div>)}</div>}</><small className={`form-attachment-hint${attachmentValidationMessage ? " has-error" : ""}`}>{attachmentValidationMessage || (attachmentFiles.length > 0 ? `Додано ${attachmentFiles.length} із ${MAX_ATTACHMENT_COUNT}. Фото допоможе точніше зрозуміти побажання.` : "До 3 зображень, до 6 МБ кожне. Фото допоможе точніше зрозуміти побажання.")}</small></div><label className="honeypot" aria-hidden="true"><span>Сайт</span><input name="website" tabIndex={-1} autoComplete="off" /></label><label className="consent full"><input name="consentAccepted" type="checkbox" required /><span>Погоджуюся на використання контактних даних. <a href="/privacy/">Докладніше</a></span></label>{siteConfig.leads.turnstileSiteKey ? <div className="turnstile full"><Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" /><div className="cf-turnstile" data-sitekey={siteConfig.leads.turnstileSiteKey} data-theme="light"></div></div> : <p className="form-error full">Форма тимчасово недоступна: не налаштований публічний ключ Turnstile.</p>} {(formError || submitState === "error") && <p className="form-error full" role="alert">{formError || "Не вдалося зберегти заявку. Дані не підтверджені як надіслані — будь ласка, зателефонуйте."}</p>}<button className="button primary dark full" type="submit" disabled={submitState === "submitting" || !siteConfig.leads.turnstileSiteKey}>{submitState === "submitting" ? "Надсилаємо…" : "Надіслати заявку"} <Icon name="arrow" /></button><small className="form-policy" id="form-preview-note">Надсилаючи форму, ви підтверджуєте згоду версії {siteConfig.leads.consentVersion}. <a href="/privacy/">Політика конфіденційності</a></small>
           </form>}
       </div></section>
 
