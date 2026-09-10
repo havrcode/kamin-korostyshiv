@@ -6,7 +6,7 @@ import { ProductInterestControl } from "../../../components/product-interest-con
 import { CatalogProductImage } from "../../../components/catalog-product-image";
 import { StructuredData } from "../../../components/structured-data";
 import { Icon } from "../../../components/ui-icon";
-import { deliveryOptions, getCategory, getProduct, publishedCategories, publishedProducts } from "../../../data/catalog";
+import { deliveryOptions, getCategory, getProduct, getProductSeoProfile, publishedCategories, publishedProducts } from "../../../data/catalog";
 import { siteConfig } from "../../../site-config";
 
 export function generateStaticParams() {
@@ -21,13 +21,15 @@ export async function generateMetadata({ params }: { params: Promise<{ categoryS
   const category = getCategory(categorySlug);
   const product = category && getProduct(category.id, productSlug);
   if (!category || !product) return {};
-  const description = `${product.summary} Виготовлення з натурального каменю в Коростишеві; розміри, матеріал, доставка й монтаж уточнюються перед прорахунком.`;
+  const seo = getProductSeoProfile(product);
+  const description = seo.description;
   return {
-    title: `${product.title} — Kaminchyk`,
+    title: `${seo.title} — Kaminchyk`,
     description,
+    robots: { index: true, follow: true },
     alternates: { canonical: `/catalog/${category.slug}/${product.slug}/` },
     openGraph: {
-      title: `${product.title} — Kaminchyk`,
+      title: `${seo.title} — Kaminchyk`,
       description,
       url: `/catalog/${category.slug}/${product.slug}/`,
       images: [{ url: product.image, width: 1200, height: 800, alt: product.imageAlt }],
@@ -50,7 +52,9 @@ export default async function ProductPage({ params }: { params: Promise<{ catego
         "@type": "Product",
         "@id": `${new URL(productUrl, siteUrl).toString()}#product`,
         name: product.title,
+        alternateName: getProductSeoProfile(product).alternateNames,
         description: product.description,
+        inLanguage: "uk-UA",
         image: [new URL(product.image, siteUrl).toString()],
         sku: product.id,
         brand: { "@type": "Brand", name: siteConfig.brand.name },

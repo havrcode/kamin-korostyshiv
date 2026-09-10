@@ -22,6 +22,7 @@ interface MemoryRow {
   lockedAt: number | null;
   sentAt: number | null;
   lastErrorCode: string | null;
+  attachmentCount: number;
 }
 
 class MemoryStatement implements D1PreparedStatementLike {
@@ -40,6 +41,11 @@ class MemoryStatement implements D1PreparedStatementLike {
   }
 
   async all<T>(): Promise<{ results: T[] }> {
+    if (this.sql.includes("FROM lead_attachments\n       WHERE lead_id")) {
+      return {
+        results: this.database.attachmentRows as T[],
+      };
+    }
     if (!this.sql.includes("FROM notification_outbox AS outbox")) {
       return { results: [] };
     }
@@ -63,6 +69,7 @@ class MemoryStatement implements D1PreparedStatementLike {
           phone_normalized: "+380660570987",
           category_snapshot: "Одинарні & подвійні",
           message: "Потрібно <швидко>",
+          attachment_count: row.attachmentCount,
         } as T,
       ],
     };
@@ -134,6 +141,17 @@ class MemoryStatement implements D1PreparedStatementLike {
 
 class MemoryOutboxDatabase implements D1DatabaseLike {
   readonly row: MemoryRow;
+  readonly attachmentRows = [
+    {
+      id: "attachment-1",
+      lead_id: "lead-1",
+      storage_key: "lead-1/attachment-1.jpg",
+      original_name: "приклад.jpg",
+      mime: "image/jpeg",
+      bytes: 11,
+      created_at: 0,
+    },
+  ];
 
   constructor(overrides: Partial<MemoryRow> = {}) {
     this.row = {
@@ -145,6 +163,7 @@ class MemoryOutboxDatabase implements D1DatabaseLike {
       lockedAt: null,
       sentAt: null,
       lastErrorCode: null,
+      attachmentCount: 0,
       ...overrides,
     };
   }
@@ -285,4 +304,84 @@ test("does not claim personal data when notification bindings are missing", asyn
   assert.equal(result.code, "NOTIFICATION_SERVICE_NOT_CONFIGURED");
   assert.equal(database.row.status, "PENDING");
   assert.equal(database.row.attemptCount, 0);
+});
+
+test("keeps attachment files private when Telegram attachment delivery is disabled", async () => {
+  const database = new MemoryOutboxDatabase({ attachmentCount: 1 });
+  let fetchCount = 0;
+  let bucketReads = 0;
+
+  const result = await processNotificationOutbox(
+    {
+      DB: database,
+      ...envSecrets,
+      TELEGRAM_SEND_ATTACHMENTS: "false",
+      LEAD_ATTACHMENTS: {
+        async put() {},
+        async get() {
+          bucketReads += 1;
+          return null;
+        },
+        async delete() {},
+      },
+    },
+    {
+      fetcher: async () => {
+        fetchCount += 1;
+        return Response.json({ ok: true });
+      },
+    },
+  );
+
+  assert.equal(result.sent, 1);
+  assert.equal(fetchCount, 1);
+  assert.equal(bucketReads, 0);
+});
+
+test("sends attachment files only when the Telegram flag is explicitly enabled", async () => {
+  const database = new MemoryOutboxDatabase({ attachmentCount: 1 });
+  let fetchCount = 0;
+  let sentDocument: File | undefined;
+
+  const result = await processNotificationOutbox(
+    {
+      DB: database,
+      ...envSecrets,
+      TELEGRAM_SEND_ATTACHMENTS: "true",
+      LEAD_ATTACHMENTS: {
+        async put() {},
+        async get() {
+          return { body: new Response("image-bytes").body };
+        },
+        async delete() {},
+      },
+    },
+    {
+      fetcher: async (_input, init) => {
+        fetchCount += 1;
+        if (init?.body instanceof FormData) {
+          sentDocument = init.body.get("document") as File;
+        }
+        return Response.json({ ok: true });
+      },
+    },
+  );
+
+  assert.equal(result.sent, 1);
+  assert.equal(fetchCount, 2);
+  assert.ok(sentDocument);
+  assert.equal(sentDocument.name, "приклад.jpg");
+  assert.equal(database.row.status, "SENT");
+});
+
+test("fails safely when attachment delivery is enabled without private R2", async () => {
+  const database = new MemoryOutboxDatabase({ attachmentCount: 1 });
+  const result = await processNotificationOutbox(
+    { DB: database, ...envSecrets, TELEGRAM_SEND_ATTACHMENTS: "true" },
+    { fetcher: async () => Response.json({ ok: true }) },
+  );
+
+  assert.equal(result.failed, 1);
+  assert.equal(database.row.status, "FAILED");
+  assert.equal(database.row.lastErrorCode, "TELEGRAM_ATTACHMENTS_NOT_CONFIGURED");
 });

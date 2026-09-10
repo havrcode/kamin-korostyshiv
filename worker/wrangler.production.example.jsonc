@@ -46,6 +46,7 @@
     "CF_ACCESS_TEAM_DOMAIN": "YOUR_TEAM.cloudflareaccess.com",
     "CF_ACCESS_AUD": "PASTE_ACCESS_APPLICATION_AUD_HERE",
     "ADMIN_EMAILS": "owner@example.com",
-    "MEDIA_PUBLIC_BASE_URL": "https://media.example.com"
+    "MEDIA_PUBLIC_BASE_URL": "https://media.example.com",
+    "TELEGRAM_SEND_ATTACHMENTS": "false"
   }
 }

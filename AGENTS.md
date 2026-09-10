@@ -11,6 +11,13 @@ In repositories indexed by CodeGraph (a `.codegraph/` directory exists at the re
 If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is the user's decision.
 <!-- CODEGRAPH_END -->
 
+### Канонічна робоча папка
+
+- Основний Git-репозиторій і єдине джерело коду проєкту: `/Users/Serhiy/Documents/Codex/kamin-korostyshiv`.
+- Workspace `/Users/Serhiy/Documents/Codex/2026-08-31-kaminkor-com-ua-chatgpt-codex-agents-5` — лише контейнер контексту Codex: він не є Git-репозиторієм і не містить сайту.
+- Перед Git, CodeGraph, Next.js або Sites-операціями перевіряти `pwd`, `git rev-parse --show-toplevel` і `git status -sb`. Якщо поточна папка не є канонічним репозиторієм, перейти до `/Users/Serhiy/Documents/Codex/kamin-korostyshiv`.
+- Не створювати в workspace `agents-5` `.codegraph`, `node_modules`, `.next`, `out` чи Git-коміти. Не змішувати його `work/` із проєктною папкою `work/`.
+
 ### Практичне використання CodeGraph у цьому проєкті
 
 - На старті задачі перевіряти `codegraph status`. Якщо індекс свіжий, першим
@@ -51,6 +58,27 @@ If there is no `.codegraph/` directory, skip CodeGraph entirely — indexing is 
   `projectPath` MCP, але не ініціалізувати індекс у сторонньому проєкті без
   прямої потреби. Не видаляти `.codegraph/` і не ділити один індекс між
   різними ОС.
+
+### Діагностика production build
+
+- Стандартна команда проєкту — `npm run build` (Next.js Turbopack). Не
+  додавати `--webpack` у скрипти або документацію як постійний обхідний шлях:
+  його дозволено запускати лише як контрольний тест, щоб відокремити проблему
+  Turbopack від проблеми середовища.
+- Відсутність нового рядка в терміналі перші 1-2 хвилини не доводить зависання.
+  Для першої production-збірки дати до 5 хвилин у звичайному локальному
+  Terminal, періодично перевіряючи, чи є прогрес або помилка.
+- Помилки `EPERM` під час запису/очищення `.next` або `out/` у Codex sandbox
+  означають обмеження середовища перевірки, а не помилку Next.js чи сайту.
+  Повторити build після надання доступу до build-артефактів або в локальному
+  Terminal, і лише тоді робити технічний висновок.
+- Попередження Node на кшталт `DEP0205` не є доказом несумісності. GitHub
+  збирає проєкт на Node 22; для відтворюваності локально використовувати Node
+  22 LTS. Не оголошувати Node 26 причиною проблеми без відтворення на Node 22
+  та без конкретного stack trace.
+- Перед релізом звіряти `package.json` і тег `v<version>`: версію підвищувати
+  до push у `main`, а наявний release-тег ніколи не намагатися перевикористати
+  для іншого коміту.
 
 1. Мова інтерфейсу й документації для власника — українська.
 2. Не змінювати візуальну систему без конкретної причини: шрифти, кольори,
